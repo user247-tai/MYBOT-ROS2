@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/tai/bot_ws/install/bumperbot_cpp_examples/include/**",
+        "/home/tai/bot_ws/install/bumperbot_msgs/include/**",
+        "/home/tai/bot_ws/install/bumperbot_mapping/include/**",
+        "/home/tai/bot_ws/install/bumperbot_localization/include/**",
+        "/home/tai/bot_ws/install/bumperbot_firmware/include/**",
+        "/home/tai/bot_ws/install/bumperbot_controller/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/tai/mybot_workspace/src/mybot_description/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
