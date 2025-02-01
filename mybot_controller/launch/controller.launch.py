@@ -37,6 +37,11 @@ def generate_launch_description():
         ]
     )
 
+    convert = Node(
+        package="mybot_controller",
+        executable="mybot_convert",
+        name="mybot_convert"
+    )
 
     return LaunchDescription(
         [
@@ -45,5 +50,6 @@ def generate_launch_description():
             wheel_separation_arg,
             joint_state_broadcaster_spawner,
             wheel_controller_spawner,
+            convert
         ]
     )
