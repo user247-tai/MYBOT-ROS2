@@ -12,6 +12,7 @@
         "/home/tai/bot_ws/install/bumperbot_localization/include/**",
         "/home/tai/bot_ws/install/bumperbot_firmware/include/**",
         "/home/tai/bot_ws/install/bumperbot_controller/include/**",
+        "/home/tai/mybot_workspace/src/mybot_hardware/include/**",
         "/opt/ros/humble/include/**",
         "/home/tai/mybot_workspace/src/mybot_description/include/**",
         "/usr/include/**"
