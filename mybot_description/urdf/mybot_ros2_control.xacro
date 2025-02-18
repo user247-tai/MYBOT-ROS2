@@ -4,20 +4,39 @@
     <ros2_control name="RobotSystem" type="system">
 
         <!-- ros2_control Gazebo -->
-        <!-- ROS 2 Humble -->
-        <xacro:if value="$(arg is_ignition)">
-            <hardware>
-                <plugin>ign_ros2_control/IgnitionSystem</plugin>
-            </hardware>
+        <xacro:if value="$(arg is_sim)">
+            <!-- ROS 2 Humble -->
+            <xacro:if value="$(arg is_ignition)">
+                <hardware>
+                    <plugin>ign_ros2_control/IgnitionSystem</plugin>
+                </hardware>
+            </xacro:if>
+
+            <!-- ROS 2 Iron or above -->
+            <xacro:unless value="$(arg is_ignition)">
+                <hardware>
+                    <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                </hardware>
+            </xacro:unless>
         </xacro:if>
 
-        <!-- ROS 2 Iron or above -->
-        <xacro:unless value="$(arg is_ignition)">
+        <xacro:unless value="$(arg is_sim)">
             <hardware>
-                <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+                <plugin>mybot_hardware/MybotHardwareInterface"</plugin>
+                <param name="left_wheel_name">left_engine_left_wheel_joint</param>
+                <param name="right_wheel_name">right_engine_right_wheel_joint</param>
+                <param name="loop_rate">30</param>
+                <param name="device">/dev/ttyUSB0</param>
+                <param name="baud_rate">57600</param>
+                <param name="timeout_ms">1000</param>
+                <param name="enc_counts_per_rev">2060</param>
+                <param name="pid_p">20</param>
+                <param name="pid_d">12</param>
+                <param name="pid_i">0</param>
+                <param name="pid_o">50</param>
             </hardware>
         </xacro:unless>
-        
+
         <!-- ros2_control Common Interfaces -->
         <joint name="right_engine_right_wheel_joint">
             <command_interface name="velocity">

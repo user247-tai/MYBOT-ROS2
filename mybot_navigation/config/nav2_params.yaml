@@ -122,7 +122,15 @@ controller_server:
 
     # DWB parameters
     FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      primary_controller: "dwb_core::DWBLocalPlanner"
+      angular_dist_threshold: 0.785
+      forward_sampling_distance: 0.5
+      rotate_to_heading_angular_vel: 1.8
+      max_angular_accel: 3.2
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
+
       debug_trajectory_details: True
       min_vel_x: 0.0 #Vận tốc tuyến tính tối thiểu theo trục X (m/s).
       min_vel_y: 0.0 #Vận tốc tối thiểu theo trục Y. (0.0 vì robot Differential Drive không di chuyển ngang.)
@@ -162,7 +170,128 @@ controller_server:
       RotateToGoal.scale: 32.0 #xác định mức độ ảnh hưởng của critic RotateToGoal đối với việc căn chỉnh góc của robot khi tiếp cận mục tiêu.
       RotateToGoal.slowing_factor: 5.0 #giúp điều chỉnh mức độ "chậm lại" của robot khi nó tiến gần tới mục tiêu 
       RotateToGoal.lookahead_time: 1.0 #robot sẽ tính toán việc căn chỉnh góc trong một khoảng thời gian nhất định trước khi đến mục tiêu
-      
+
+# controller_server:
+#   ros__parameters:
+#     controller_frequency: 20.0
+#     min_x_velocity_threshold: 0.001
+#     min_y_velocity_threshold: 0.5
+#     min_theta_velocity_threshold: 0.001
+#     progress_checker_plugins: ["progress_checker"]
+#     goal_checker_plugins: ["goal_checker"]
+#     controller_plugins: ["FollowPath"]
+#     progress_checker:
+#       plugin: "nav2_controller::SimpleProgressChecker"
+#       required_movement_radius: 0.5
+#       movement_time_allowance: 10.0
+#     goal_checker:
+#       plugin: "nav2_controller::SimpleGoalChecker"
+#       xy_goal_tolerance: 0.25
+#       yaw_goal_tolerance: 0.25
+#       stateful: True
+#     FollowPath:
+#       plugin: "nav2_mppi_controller::MPPIController"
+#       time_steps: 30
+#       model_dt: 0.1
+#       batch_size: 2000
+#       vx_std: 0.2
+#       vy_std: 0.2
+#       wz_std: 0.4
+#       vx_max: 0.7
+#       vx_min: -0.35
+#       vy_max: 0.0
+#       wz_max: 1.9
+#       ax_max: 3.0
+#       ax_min: -3.0
+#       ay_max: 3.0
+#       az_max: 3.5
+#       iteration_count: 1
+#       prune_distance: 1.7
+#       transform_tolerance: 0.1
+#       temperature: 0.3
+#       gamma: 0.015
+#       motion_model: "DiffDrive"
+#       visualize: false
+#       reset_period: 1.0 # (only in Humble)
+#       regenerate_noises: false
+#       TrajectoryVisualizer:
+#         trajectory_step: 5
+#         time_step: 3
+#       AckermannConstraints:
+#         min_turning_r: 0.2
+#       critics: ["ConstraintCritic", "CostCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic"]
+#       ConstraintCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 4.0
+#       GoalCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 5.0
+#         threshold_to_consider: 1.4
+#       GoalAngleCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 3.0
+#         threshold_to_consider: 0.5
+#       PreferForwardCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 5.0
+#         threshold_to_consider: 0.5
+#       ObstaclesCritic:
+#         enabled: true
+#         cost_power: 1
+#         repulsion_weight: 1.5
+#         critical_weight: 20.0
+#         consider_footprint: false
+#         collision_cost: 10000.0
+#         collision_margin_distance: 0.1
+#         near_goal_distance: 0.5
+#         inflation_radius: 0.55 # (only in Humble)
+#         cost_scaling_factor: 10.0 # (only in Humble)
+#       CostCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 3.81
+#         critical_cost: 300.0
+#         consider_footprint: true
+#         collision_cost: 1000000.0
+#         near_goal_distance: 1.0
+#         trajectory_point_step: 2
+#       PathAlignCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 14.0
+#         max_path_occupancy_ratio: 0.05
+#         trajectory_point_step: 4
+#         threshold_to_consider: 0.5
+#         offset_from_furthest: 20
+#         use_path_orientations: false
+#       PathFollowCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 5.0
+#         offset_from_furthest: 5
+#         threshold_to_consider: 1.4
+#       PathAngleCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 2.0
+#         offset_from_furthest: 4
+#         threshold_to_consider: 0.5
+#         max_angle_to_furthest: 1.0
+#         mode: 0
+#       VelocityDeadbandCritic:
+#         enabled: true
+#         cost_power: 1
+#         cost_weight: 35.0
+#         deadband_velocities: [0.05, 0.05, 0.05]
+#       TwirlingCritic:
+#         enabled: true
+#         twirling_cost_power: 1
+#         twirling_cost_weight: 10.0
+
 controller_server_rclcpp_node:
   ros__parameters:
     use_sim_time: True
@@ -180,7 +309,8 @@ local_costmap:
       height: 5 #Kích thước của bản đồ cục bộ (m).
       resolution: 0.05 #Độ phân giải bản đồ (m/cell).
       robot_radius: 0.2 #Bán kính robot (m).
-      plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
+      #plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         inflation_radius: 0.5 #Khoảng cách mở rộng từ vật thể.
@@ -195,28 +325,28 @@ local_costmap:
           clearing: True #Cho phép xóa vật thể khi không còn thấy chúng.
           marking: True #Đánh dấu vật thể vào costmap.
           data_type: "LaserScan"
-      voxel_layer:
-        plugin: "nav2_costmap_2d::VoxelLayer"
-        enabled: True
-        publish_voxel_map: True #Xuất bản bản đồ voxel.
-        origin_z: 0.0 #Chiều cao ban đầu của voxel grid.
-        z_resolution: 0.05 #Độ phân giải trục Z (m).
-        z_voxels: 10 #Số lớp voxel theo chiều cao.
-        max_obstacle_height: 0.5 #Chiều cao tối đa của chướng ngại vật (m).
-        mark_threshold: 0 #Ngưỡng đánh dấu voxel lên bản đồ (Giữ mặc định 0 để đánh dấu tất cả voxel)
-        observation_sources: scan #Xác định nguồn cảm biến để phát hiện vật thể.
-        scan:
-          topic: /scan
-          max_obstacle_height: 0.5 #Chiều cao tối đa của vật cản được phát hiện (m).
-          clearing: True #Xóa vật thể khỏi costmap nếu không còn phát hiện thấy.
-          marking: True #Đánh dấu vật thể lên costmap khi phát hiện thấy.
-          data_type: "LaserScan"
-          raytrace_max_range: 2.0 #Phạm vi tối đa để xóa vật thể khi không còn thấy nữa (m).
-          raytrace_min_range: 0.0 #Khoảng cách tối thiểu để xóa vật thể (m).
-          obstacle_max_range: 3.0 #Khoảng cách tối đa để phát hiện vật thể (m).
-          obstacle_min_range: 0.0 #Khoảng cách tối thiểu để phát hiện vật thể (m).
-      static_layer:
-        map_subscribe_transient_local: True #Dùng bản đồ tĩnh từ SLAM hoặc bản đồ có sẵn.
+      # voxel_layer:
+      #   plugin: "nav2_costmap_2d::VoxelLayer"
+      #   enabled: True
+      #   publish_voxel_map: True #Xuất bản bản đồ voxel.
+      #   origin_z: 0.0 #Chiều cao ban đầu của voxel grid.
+      #   z_resolution: 0.05 #Độ phân giải trục Z (m).
+      #   z_voxels: 10 #Số lớp voxel theo chiều cao.
+      #   max_obstacle_height: 0.5 #Chiều cao tối đa của chướng ngại vật (m).
+      #   mark_threshold: 0 #Ngưỡng đánh dấu voxel lên bản đồ (Giữ mặc định 0 để đánh dấu tất cả voxel)
+      #   observation_sources: scan #Xác định nguồn cảm biến để phát hiện vật thể.
+      #   scan:
+      #     topic: /scan
+      #     max_obstacle_height: 0.5 #Chiều cao tối đa của vật cản được phát hiện (m).
+      #     clearing: True #Xóa vật thể khỏi costmap nếu không còn phát hiện thấy.
+      #     marking: True #Đánh dấu vật thể lên costmap khi phát hiện thấy.
+      #     data_type: "LaserScan"
+      #     raytrace_max_range: 2.0 #Phạm vi tối đa để xóa vật thể khi không còn thấy nữa (m).
+      #     raytrace_min_range: 0.0 #Khoảng cách tối thiểu để xóa vật thể (m).
+      #     obstacle_max_range: 3.0 #Khoảng cách tối đa để phát hiện vật thể (m).
+      #     obstacle_min_range: 0.0 #Khoảng cách tối thiểu để phát hiện vật thể (m).
+      # static_layer:
+      #   map_subscribe_transient_local: True #Dùng bản đồ tĩnh từ SLAM hoặc bản đồ có sẵn.
       always_send_full_costmap: True #Gửi toàn bộ bản đồ thay vì chỉ phần thay đổi.
   local_costmap_client:
     ros__parameters:
@@ -236,7 +366,8 @@ global_costmap:
       robot_radius: 0.2 #Bán kính robot
       resolution: 0.05 #Độ phân giải
       track_unknown_space: true #theo dõi không gian chưa biết
-      plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
+      # plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -251,26 +382,26 @@ global_costmap:
           raytrace_min_range: 0.0 #Khoảng cách tối thiểu để xóa vật thể (m).
           obstacle_max_range: 5.0 #Khoảng cách tối đa để phát hiện vật thể (m).
           obstacle_min_range: 0.0 #Khoảng cách tối thiểu để phát hiện vật thể (m).
-      voxel_layer:
-        plugin: "nav2_costmap_2d::VoxelLayer"
-        enabled: True
-        publish_voxel_map: True
-        origin_z: 0.0
-        z_resolution: 0.05
-        z_voxels: 16
-        max_obstacle_height: 0.5
-        mark_threshold: 0
-        observation_sources: scan
-        scan:
-          topic: /scan
-          max_obstacle_height: 0.5
-          clearing: True
-          marking: True
-          data_type: "LaserScan"
-          raytrace_max_range: 4.5
-          raytrace_min_range: 0.0
-          obstacle_max_range: 5.0
-          obstacle_min_range: 0.0
+      # voxel_layer:
+      #   plugin: "nav2_costmap_2d::VoxelLayer"
+      #   enabled: True
+      #   publish_voxel_map: True
+      #   origin_z: 0.0
+      #   z_resolution: 0.05
+      #   z_voxels: 16
+      #   max_obstacle_height: 0.5
+      #   mark_threshold: 0
+      #   observation_sources: scan
+      #   scan:
+      #     topic: /scan
+      #     max_obstacle_height: 0.5
+      #     clearing: True
+      #     marking: True
+      #     data_type: "LaserScan"
+      #     raytrace_max_range: 4.5
+      #     raytrace_min_range: 0.0
+      #     obstacle_max_range: 5.0
+      #     obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
@@ -348,3 +479,81 @@ waypoint_follower:
       plugin: "nav2_waypoint_follower::WaitAtWaypoint"
       enabled: True
       waypoint_pause_duration: 200 #Đây là thời gian mà robot sẽ dừng lại tại mỗi waypoint (tính bằng giây). 
+
+smoother_server:
+  ros__parameters:
+    use_sim_time: True
+    smoother_plugins: ["SmoothPath"]
+
+    SmoothPath:
+      plugin: "nav2_constrained_smoother/ConstrainedSmoother"
+      reversing_enabled: false       # whether to detect forward/reverse direction and cusps. Should be set to false for paths without orientations assigned
+      path_downsampling_factor: 3   # every n-th node of the path is taken. Useful for speed-up
+      path_upsampling_factor: 1     # 0 - path remains downsampled, 1 - path is upsampled back to original granularity using cubic bezier, 2... - more upsampling
+      keep_start_orientation: true  # whether to prevent the start orientation from being smoothed
+      keep_goal_orientation: true   # whether to prevent the gpal orientation from being smoothed
+      minimum_turning_radius: 0.10  # minimum turning radius the robot can perform. Can be set to 0.0 (or w_curve can be set to 0.0 with the same effect) for diff-drive/holonomic robots
+      w_curve: 40.0                 # weight to enforce minimum_turning_radius
+      w_dist: 0.0                   # weight to bind path to original as optional replacement for cost weight
+      w_smooth: 2000000.0           # weight to maximize smoothness of path
+      w_cost: 0.015                 # weight to steer robot away from collision and cost
+
+      # Parameters used to improve obstacle avoidance near cusps (forward/reverse movement changes)
+      w_cost_cusp_multiplier: 3.0   # option to use higher weight during forward/reverse direction change which is often accompanied with dangerous rotations
+      cusp_zone_length: 2.5         # length of the section around cusp in which nodes use w_cost_cusp_multiplier (w_cost rises gradually inside the zone towards the cusp point, whose costmap weight eqals w_cost*w_cost_cusp_multiplier)
+
+      # Points in robot frame to grab costmap values from. Format: [x1, y1, weight1, x2, y2, weight2, ...]
+      # IMPORTANT: Requires much higher number of iterations to actually improve the path. Uncomment only if you really need it (highly elongated/asymmetric robots)
+      # cost_check_points: [-0.185, 0.0, 1.0]
+
+      optimizer:
+        max_iterations: 70            # max iterations of smoother
+        debug_optimizer: false        # print debug info
+        gradient_tol: 5000.0
+        fn_tol: 0.000000000000001
+        param_tol: 0.00000000000000000001
+
+# velocity_smoother:
+#   ros__parameters:
+#     smoothing_frequency: 20.0
+#     scale_velocities: False
+#     feedback: "OPEN_LOOP"
+#     max_velocity: [0.5, 0.0, 2.0]
+#     min_velocity: [-0.5, 0.0, -2.0]
+#     max_accel: [2.5, 0.0, 3.2]
+#     max_decel: [-2.5, 0.0, -3.2]
+#     odom_topic: "odom"
+#     odom_duration: 0.1
+#     deadband_velocity: [0.0, 0.0, 0.0]
+#     velocity_timeout: 1.0 
+
+# collision_monitor:
+#   ros__parameters:
+#     base_frame_id: "base_link"
+#     odom_frame_id: "odom"
+#     cmd_vel_in_topic: "cmd_vel_smoothed"
+#     cmd_vel_out_topic: "cmd_vel"
+#     state_topic: "collision_monitor_state"
+#     transform_tolerance: 0.2
+#     source_timeout: 1.0
+#     base_shift_correction: True
+#     stop_pub_timeout: 2.0
+#     # Polygons represent zone around the robot for "stop", "slowdown" and "limit" action types,
+#     # and robot footprint for "approach" action type.
+#     polygons: ["FootprintApproach"]
+#     FootprintApproach:
+#       type: "polygon"
+#       action_type: "approach"
+#       footprint_topic: "/local_costmap/published_footprint"
+#       time_before_collision: 1.2
+#       simulation_time_step: 0.1
+#       min_points: 6
+#       visualize: False
+#       enabled: True
+#     observation_sources: ["scan"]
+#     scan:
+#       type: "scan"
+#       topic: "scan"
+#       min_height: 0.15
+#       max_height: 2.0
+#       enabled: True
