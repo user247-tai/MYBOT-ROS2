@@ -8,10 +8,6 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 def generate_launch_description():
 
-    use_sim_time = LaunchConfiguration("use_sim_time")
-    slam_config = LaunchConfiguration("slam_config")
-    lifecycle_nodes = ["map_saver_server"]
-
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
         default_value="true"
@@ -26,6 +22,17 @@ def generate_launch_description():
         ),
         description="Full path to slam yaml file to load"
     )
+
+    rviz_config_dir = LaunchConfiguration(
+        'params_file',
+        default=os.path.join(
+            get_package_share_directory('mybot_slam'),
+            'rviz',
+            'rviz_slam.rviz'))
+
+    use_sim_time = LaunchConfiguration("use_sim_time")
+    slam_config = LaunchConfiguration("slam_config")
+    lifecycle_nodes = ["map_saver_server"]
     
     nav2_map_saver = Node(
         package="nav2_map_server",
@@ -63,10 +70,20 @@ def generate_launch_description():
         ],
     )
 
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config_dir],
+        parameters=[{'use_sim_time': use_sim_time}],
+        output='screen'
+    )
+
     return LaunchDescription([
         use_sim_time_arg,
         slam_config_arg,
         nav2_map_saver,
         slam_toolbox,
         nav2_lifecycle_manager,
+        rviz
     ])

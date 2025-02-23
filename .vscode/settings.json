@@ -20,5 +20,10 @@
         "/home/tai/bot_ws/install/bumperbot_controller/local/lib/python3.10/dist-packages",
         "/opt/ros/humble/lib/python3.10/site-packages",
         "/opt/ros/humble/local/lib/python3.10/dist-packages"
-    ]
+    ],
+    "files.associations": {
+        "memory": "cpp",
+        "string": "cpp",
+        "iostream": "cpp"
+    }
 }

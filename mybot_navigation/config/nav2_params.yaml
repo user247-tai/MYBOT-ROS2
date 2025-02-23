@@ -99,77 +99,143 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: True
-    controller_frequency: 10.0
-    min_x_velocity_threshold: 0.001 #Xác định ngưỡng vận tốc nhỏ nhất theo trục X mà controller server sẽ áp dụng
-    min_y_velocity_threshold: 0.0 #Xác định ngưỡng vận tốc nhỏ nhất theo trục Y (chỉ áp dụng với robot holonomic như Mecanum hoặc Omni-wheel)
-    min_theta_velocity_threshold: 0.001 
-    failure_tolerance: 0.3 #Xác định thời gian robot có thể không di chuyển mà không bị coi là thất bại, hệ thống sẽ coi là có lỗi và có thể thực hiện hành động recovery.
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
     progress_checker_plugin: "progress_checker"
-    goal_checker_plugins: ["general_goal_checker"] 
+    goal_checker_plugins: ["general_goal_checker"]
     controller_plugins: ["FollowPath"]
 
     # Progress checker parameters
     progress_checker:
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.3 #0.5 #Khoảng cách tối thiểu robot phải di chuyển trong movement_time_allowance giây để không bị coi là bị kẹt.
-      movement_time_allowance: 7.0 #10.0 #Thời gian tối đa robot có thể đứng yên trước khi bị coi là bị kẹt.
-    
+      required_movement_radius: 0.25
+      movement_time_allowance: 10.0
+
+    # Goal checker parameters
     general_goal_checker:
-      stateful: True
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25 #Robot sẽ coi là đến đích nếu khoảng cách tới điểm đến <= config
-      yaw_goal_tolerance: 0.25 #Sai số góc cho phép <= config (rad)
-
-    # DWB parameters
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
+      stateful: True
+    
     FollowPath:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-      primary_controller: "dwb_core::DWBLocalPlanner"
-      angular_dist_threshold: 0.785
-      forward_sampling_distance: 0.5
-      rotate_to_heading_angular_vel: 1.8
-      max_angular_accel: 3.2
-      simulate_ahead_time: 1.0
-      rotate_to_goal_heading: false
+      # plugin: "nav2_rotation_shim_controller::RotationShimController"
+      # primary_controller: "vector_pursuit_controller::VectorPursuitController"
+      # angular_dist_threshold: 1.5 #0.785
+      # forward_sampling_distance: 2.0
+      # rotate_to_heading_angular_vel: 3.6 #1.8
+      # max_angular_accel: 5.0 
+      # simulate_ahead_time: 1.0
+      # rotate_to_goal_heading: true
+      
+      plugin: "vector_pursuit_controller::VectorPursuitController"
+      k: 10.0 #5.0
+      desired_linear_vel: 0.7 #0.5
+      min_turning_radius: 0.25
+      lookahead_dist: 1.0
+      min_lookahead_dist: 0.5
+      max_lookahead_dist: 1.5
+      lookahead_time: 1.5
+      rotate_to_heading_angular_vel: 0.5
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: false
+      min_linear_velocity: 0.0
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.5
+      max_allowed_time_to_collision_up_to_target: 1.0
+      use_collision_detection: true
+      use_cost_regulated_linear_velocity_scaling: true
+      cost_scaling_dist: 0.1 #0.5
+      cost_scaling_gain: 0.3 #1.0
+      inflation_cost_scaling_factor: 1.0 #3.0
+      use_rotate_to_heading: true
+      allow_reversing: false
+      rotate_to_heading_min_angle: 0.5
+      max_angular_accel: 6.0
+      max_linear_accel: 3.0 #2.0
+      max_lateral_accel: 0.7 #0.2
+      max_robot_pose_search_dist: 10.0
+      use_interpolation: true
+      use_heading_from_path: false
+      approach_velocity_scaling_dist: 1.0
 
-      debug_trajectory_details: True
-      min_vel_x: 0.0 #Vận tốc tuyến tính tối thiểu theo trục X (m/s).
-      min_vel_y: 0.0 #Vận tốc tối thiểu theo trục Y. (0.0 vì robot Differential Drive không di chuyển ngang.)
-      max_vel_x: 0.7 #Vận tốc tuyến tính tối đa theo trục X (m/s).
-      max_vel_y: 0.0 #Vận tốc tối đa theo trục Y. (0.0 vì robot không có Omnidirectional Drive.)
-      max_vel_theta: 1.5 #Vận tốc góc tối đa (rad/s).
-      min_speed_xy: 0.0 #Tốc độ tối thiểu khi di chuyển (m/s).
-      max_speed_xy: 0.7 #Tốc độ tối đa trong không gian XY. (Nên bằng max_vel_x.)
-      min_speed_theta: 0.0 #Tốc độ góc tối thiểu khi quay.
-      # Add high threshold velocity for turtlebot 3 issue.
-      # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
-      acc_lim_x: 2.5 #Gia tốc tối đa theo trục X (m/s²).
-      acc_lim_y: 0.0 #Gia tốc tối đa theo trục Y.(robot sử dụng Differential Drive không di chuyển ngang.)
-      acc_lim_theta: 3.2 #Gia tốc quay tối đa (rad/s²).
-      decel_lim_x: -2.5 #Giảm tốc tối đa theo trục X.
-      decel_lim_y: 0.0 #Giảm tốc tối đa theo trục Y.
-      decel_lim_theta: -3.2 #Giảm tốc quay tối đa (rad/s²).
-      vx_samples: 20 #Số lượng mẫu tốc độ trên trục X
-      vy_samples: 0 #Số lượng mẫu tốc độ trên trục Y (robot Differential Drive không di chuyển ngang).
-      vtheta_samples: 40 #Số lượng mẫu tốc độ xoay 
-      sim_time: 1.0 #xác định thời gian mô phỏng (simulation time) mà planner sử dụng để đánh giá và tính toán các quỹ đạo trong không gian trạng thái.
-      linear_granularity: 0.05 #quyết định độ phân giải khi lập kế hoạch tuyến tính (linear resolution) trong không gian XY
-      angular_granularity: 0.025 #xác định mức độ chi tiết trong các phép quay mà planner có thể thực hiện.
-      transform_tolerance: 0.2 #độ dung sai khi robot thực hiện các phép biến đổi (transformation),
-      xy_goal_tolerance: 0.05 # xác định khoảng cách tối đa giữa robot và mục tiêu mà robot vẫn được coi là "đã đến đích" khi di chuyển trong không gian XY
-      trans_stopped_velocity: 0.25 #Tham số này xác định vận tốc tối thiểu mà robot cần đạt được để hệ thống coi là đã dừng lại hoàn toàn.
-      short_circuit_trajectory_evaluation: True #ừng việc đánh giá các quỹ đạo không khả thi ngay lập tức, thay vì tiếp tục đánh giá toàn bộ các lựa chọn.
-      stateful: True # theo dõi trạng thái của robot và các quá trình liên quan đến hành động của nó, giúp điều chỉnh và đưa ra quyết định một cách thông minh hơn
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"] #các thành phần trong quá trình lập kế hoạch quỹ đạo mà giúp đánh giá và điều chỉnh hành vi của robot trong khi di chuyển. 
-      BaseObstacle.scale: 0.01 #Xác định độ nhạy của robot với chướng ngại vật.
-      PathAlign.scale: 20.0 #Xác định mức độ quan trọng của việc giữ robot trên đường đi.
-      PathAlign.forward_point_distance: 0.3 #Robot nhìn về phía trước xm để điều chỉnh hướng theo đường đi.
-      GoalAlign.scale: 24.0 #Xác định mức độ quan trọng của việc căn chỉnh hướng khi đến gần mục tiêu.
-      GoalAlign.forward_point_distance: 0.1 #Cách robot căn chỉnh hướng trước khi chạm mục tiêu.
-      PathDist.scale: 32.0 #Điều chỉnh khoảng cách giữa robot và quỹ đạo dự kiến.
-      GoalDist.scale: 24.0 #Điều chỉnh mức độ quan trọng của khoảng cách đến mục tiêu.
-      RotateToGoal.scale: 32.0 #xác định mức độ ảnh hưởng của critic RotateToGoal đối với việc căn chỉnh góc của robot khi tiếp cận mục tiêu.
-      RotateToGoal.slowing_factor: 5.0 #giúp điều chỉnh mức độ "chậm lại" của robot khi nó tiến gần tới mục tiêu 
-      RotateToGoal.lookahead_time: 1.0 #robot sẽ tính toán việc căn chỉnh góc trong một khoảng thời gian nhất định trước khi đến mục tiêu
+# controller_server:
+#   ros__parameters:
+#     use_sim_time: True
+#     controller_frequency: 10.0
+#     min_x_velocity_threshold: 0.001 #Xác định ngưỡng vận tốc nhỏ nhất theo trục X mà controller server sẽ áp dụng
+#     min_y_velocity_threshold: 0.0 #Xác định ngưỡng vận tốc nhỏ nhất theo trục Y (chỉ áp dụng với robot holonomic như Mecanum hoặc Omni-wheel)
+#     min_theta_velocity_threshold: 0.001 
+#     failure_tolerance: 0.3 #Xác định thời gian robot có thể không di chuyển mà không bị coi là thất bại, hệ thống sẽ coi là có lỗi và có thể thực hiện hành động recovery.
+#     progress_checker_plugin: "progress_checker"
+#     goal_checker_plugins: ["general_goal_checker"] 
+#     controller_plugins: ["FollowPath"]
+
+#     # Progress checker parameters
+#     progress_checker:
+#       plugin: "nav2_controller::SimpleProgressChecker"
+#       required_movement_radius: 0.3 #0.5 #Khoảng cách tối thiểu robot phải di chuyển trong movement_time_allowance giây để không bị coi là bị kẹt.
+#       movement_time_allowance: 7.0 #10.0 #Thời gian tối đa robot có thể đứng yên trước khi bị coi là bị kẹt.
+    
+#     general_goal_checker:
+#       stateful: True
+#       plugin: "nav2_controller::SimpleGoalChecker"
+#       xy_goal_tolerance: 0.25 #Robot sẽ coi là đến đích nếu khoảng cách tới điểm đến <= config
+#       yaw_goal_tolerance: 0.25 #Sai số góc cho phép <= config (rad)
+
+#     # DWB parameters
+#     FollowPath:
+#       plugin: "nav2_rotation_shim_controller::RotationShimController"
+#       primary_controller: "dwb_core::DWBLocalPlanner"
+#       angular_dist_threshold: 0.785
+#       forward_sampling_distance: 0.5
+#       rotate_to_heading_angular_vel: 1.8
+#       max_angular_accel: 3.2
+#       simulate_ahead_time: 1.0
+#       rotate_to_goal_heading: false
+
+#       debug_trajectory_details: True
+#       min_vel_x: 0.0 #Vận tốc tuyến tính tối thiểu theo trục X (m/s).
+#       min_vel_y: 0.0 #Vận tốc tối thiểu theo trục Y. (0.0 vì robot Differential Drive không di chuyển ngang.)
+#       max_vel_x: 0.7 #Vận tốc tuyến tính tối đa theo trục X (m/s).
+#       max_vel_y: 0.0 #Vận tốc tối đa theo trục Y. (0.0 vì robot không có Omnidirectional Drive.)
+#       max_vel_theta: 1.5 #Vận tốc góc tối đa (rad/s).
+#       min_speed_xy: 0.0 #Tốc độ tối thiểu khi di chuyển (m/s).
+#       max_speed_xy: 0.7 #Tốc độ tối đa trong không gian XY. (Nên bằng max_vel_x.)
+#       min_speed_theta: 0.0 #Tốc độ góc tối thiểu khi quay.
+#       # Add high threshold velocity for turtlebot 3 issue.
+#       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
+#       acc_lim_x: 2.5 #Gia tốc tối đa theo trục X (m/s²).
+#       acc_lim_y: 0.0 #Gia tốc tối đa theo trục Y.(robot sử dụng Differential Drive không di chuyển ngang.)
+#       acc_lim_theta: 3.2 #Gia tốc quay tối đa (rad/s²).
+#       decel_lim_x: -2.5 #Giảm tốc tối đa theo trục X.
+#       decel_lim_y: 0.0 #Giảm tốc tối đa theo trục Y.
+#       decel_lim_theta: -3.2 #Giảm tốc quay tối đa (rad/s²).
+#       vx_samples: 20 #Số lượng mẫu tốc độ trên trục X
+#       vy_samples: 0 #Số lượng mẫu tốc độ trên trục Y (robot Differential Drive không di chuyển ngang).
+#       vtheta_samples: 40 #Số lượng mẫu tốc độ xoay 
+#       sim_time: 1.0 #xác định thời gian mô phỏng (simulation time) mà planner sử dụng để đánh giá và tính toán các quỹ đạo trong không gian trạng thái.
+#       linear_granularity: 0.05 #quyết định độ phân giải khi lập kế hoạch tuyến tính (linear resolution) trong không gian XY
+#       angular_granularity: 0.025 #xác định mức độ chi tiết trong các phép quay mà planner có thể thực hiện.
+#       transform_tolerance: 0.2 #độ dung sai khi robot thực hiện các phép biến đổi (transformation),
+#       xy_goal_tolerance: 0.05 # xác định khoảng cách tối đa giữa robot và mục tiêu mà robot vẫn được coi là "đã đến đích" khi di chuyển trong không gian XY
+#       trans_stopped_velocity: 0.25 #Tham số này xác định vận tốc tối thiểu mà robot cần đạt được để hệ thống coi là đã dừng lại hoàn toàn.
+#       short_circuit_trajectory_evaluation: True #ừng việc đánh giá các quỹ đạo không khả thi ngay lập tức, thay vì tiếp tục đánh giá toàn bộ các lựa chọn.
+#       stateful: True # theo dõi trạng thái của robot và các quá trình liên quan đến hành động của nó, giúp điều chỉnh và đưa ra quyết định một cách thông minh hơn
+#       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"] #các thành phần trong quá trình lập kế hoạch quỹ đạo mà giúp đánh giá và điều chỉnh hành vi của robot trong khi di chuyển. 
+#       BaseObstacle.scale: 0.01 #Xác định độ nhạy của robot với chướng ngại vật.
+#       PathAlign.scale: 20.0 #Xác định mức độ quan trọng của việc giữ robot trên đường đi.
+#       PathAlign.forward_point_distance: 0.3 #Robot nhìn về phía trước xm để điều chỉnh hướng theo đường đi.
+#       GoalAlign.scale: 24.0 #Xác định mức độ quan trọng của việc căn chỉnh hướng khi đến gần mục tiêu.
+#       GoalAlign.forward_point_distance: 0.1 #Cách robot căn chỉnh hướng trước khi chạm mục tiêu.
+#       PathDist.scale: 32.0 #Điều chỉnh khoảng cách giữa robot và quỹ đạo dự kiến.
+#       GoalDist.scale: 24.0 #Điều chỉnh mức độ quan trọng của khoảng cách đến mục tiêu.
+#       RotateToGoal.scale: 32.0 #xác định mức độ ảnh hưởng của critic RotateToGoal đối với việc căn chỉnh góc của robot khi tiếp cận mục tiêu.
+#       RotateToGoal.slowing_factor: 5.0 #giúp điều chỉnh mức độ "chậm lại" của robot khi nó tiến gần tới mục tiêu 
+#       RotateToGoal.lookahead_time: 1.0 #robot sẽ tính toán việc căn chỉnh góc trong một khoảng thời gian nhất định trước khi đến mục tiêu
 
 # controller_server:
 #   ros__parameters:
@@ -308,7 +374,7 @@ local_costmap:
       width: 5 #Kích thước của bản đồ cục bộ (m).
       height: 5 #Kích thước của bản đồ cục bộ (m).
       resolution: 0.05 #Độ phân giải bản đồ (m/cell).
-      robot_radius: 0.2 #Bán kính robot (m).
+      robot_radius: 0.15 #Bán kính robot (m).
       #plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
       plugins: ["obstacle_layer", "inflation_layer"]
       inflation_layer:

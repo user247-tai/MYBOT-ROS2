@@ -1,5 +1,5 @@
-#ifndef MYBOT_HARDWARE_ARDUINO_COMMS_HPP
-#define MYBOT_HARDWARE_ARDUINO_COMMS_HPP
+#ifndef MYBOT_CONTROL_ARDUINO_COMMS_HPP
+#define MYBOT_CONTROL_ARDUINO_COMMS_HPP
 
 // #include <cstring>
 #include <sstream>
@@ -115,4 +115,4 @@ private:
     int timeout_ms_;
 };
 
-#endif // MYBOT_HARDWARE_ARDUINO_COMMS_HPP
+#endif 

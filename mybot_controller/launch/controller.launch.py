@@ -5,10 +5,6 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     
-    use_sim_time_arg = DeclareLaunchArgument(
-        "use_sim_time",
-        default_value="True",
-    )
     wheel_radius_arg = DeclareLaunchArgument(
         "wheel_radius",
         default_value="0.033",
@@ -45,7 +41,6 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            use_sim_time_arg,
             wheel_radius_arg,
             wheel_separation_arg,
             joint_state_broadcaster_spawner,

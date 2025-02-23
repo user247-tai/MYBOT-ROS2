@@ -1,0 +1,9 @@
+<library path="mybot_control">
+  <class name="mybot_control/MybotHWInterface"
+         type="mybot_control::MybotHWInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      MYBOT HARDWARE INTERFACE
+    </description>
+  </class>
+</library>

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "mybot_hardware/diffbot_system.hpp"
+#include "mybot_control/diffbot_system.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -23,9 +23,9 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-namespace mybot_hardware
+namespace mybot_control
 {
-hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
+hardware_interface::CallbackReturn MybotHWInterface::on_init(
   const hardware_interface::HardwareInfo & info)
 {
   if (
@@ -52,7 +52,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
   }
   else
   {
-    RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "PID values not supplied, using defaults.");
+    RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "PID values not supplied, using defaults.");
   }
   
 
@@ -66,7 +66,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
     if (joint.command_interfaces.size() != 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("MybotHardwareInterface"),
+        rclcpp::get_logger("MybotHWInterface"),
         "Joint '%s' has %zu command interfaces found. 1 expected.", joint.name.c_str(),
         joint.command_interfaces.size());
       return hardware_interface::CallbackReturn::ERROR;
@@ -75,7 +75,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
     if (joint.command_interfaces[0].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("MybotHardwareInterface"),
+        rclcpp::get_logger("MybotHWInterface"),
         "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
         joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return hardware_interface::CallbackReturn::ERROR;
@@ -84,7 +84,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
     if (joint.state_interfaces.size() != 2)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("MybotHardwareInterface"),
+        rclcpp::get_logger("MybotHWInterface"),
         "Joint '%s' has %zu state interface. 2 expected.", joint.name.c_str(),
         joint.state_interfaces.size());
       return hardware_interface::CallbackReturn::ERROR;
@@ -93,7 +93,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
     if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("MybotHardwareInterface"),
+        rclcpp::get_logger("MybotHWInterface"),
         "Joint '%s' have '%s' as first state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
       return hardware_interface::CallbackReturn::ERROR;
@@ -102,7 +102,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
     if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("MybotHardwareInterface"),
+        rclcpp::get_logger("MybotHWInterface"),
         "Joint '%s' have '%s' as second state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return hardware_interface::CallbackReturn::ERROR;
@@ -112,7 +112,7 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_init(
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-std::vector<hardware_interface::StateInterface> MybotHardwareInterface::export_state_interfaces()
+std::vector<hardware_interface::StateInterface> MybotHWInterface::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
 
@@ -129,7 +129,7 @@ std::vector<hardware_interface::StateInterface> MybotHardwareInterface::export_s
   return state_interfaces;
 }
 
-std::vector<hardware_interface::CommandInterface> MybotHardwareInterface::export_command_interfaces()
+std::vector<hardware_interface::CommandInterface> MybotHWInterface::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
 
@@ -142,38 +142,38 @@ std::vector<hardware_interface::CommandInterface> MybotHardwareInterface::export
   return command_interfaces;
 }
 
-hardware_interface::CallbackReturn MybotHardwareInterface::on_configure(
+hardware_interface::CallbackReturn MybotHWInterface::on_configure(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Configuring ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Configuring ...please wait...");
   if (comms_.connected())
   {
     comms_.disconnect();
   }
   comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Successfully configured!");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Successfully configured!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn MybotHardwareInterface::on_cleanup(
+hardware_interface::CallbackReturn MybotHWInterface::on_cleanup(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Cleaning up ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Cleaning up ...please wait...");
   if (comms_.connected())
   {
     comms_.disconnect();
   }
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Successfully cleaned up!");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Successfully cleaned up!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 
-hardware_interface::CallbackReturn MybotHardwareInterface::on_activate(
+hardware_interface::CallbackReturn MybotHWInterface::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Activating ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Activating ...please wait...");
   if (!comms_.connected())
   {
     return hardware_interface::CallbackReturn::ERROR;
@@ -182,21 +182,21 @@ hardware_interface::CallbackReturn MybotHardwareInterface::on_activate(
   {
     comms_.set_pid_values(cfg_.pid_p,cfg_.pid_d,cfg_.pid_i,cfg_.pid_o);
   }
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Successfully activated!");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Successfully activated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::CallbackReturn MybotHardwareInterface::on_deactivate(
+hardware_interface::CallbackReturn MybotHWInterface::on_deactivate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Deactivating ...please wait...");
-  RCLCPP_INFO(rclcpp::get_logger("MybotHardwareInterface"), "Successfully deactivated!");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Deactivating ...please wait...");
+  RCLCPP_INFO(rclcpp::get_logger("MybotHWInterface"), "Successfully deactivated!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type MybotHardwareInterface::read(
+hardware_interface::return_type MybotHWInterface::read(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
 {
   if (!comms_.connected())
@@ -219,7 +219,7 @@ hardware_interface::return_type MybotHardwareInterface::read(
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type mybot_hardware ::MybotHardwareInterface::write(
+hardware_interface::return_type mybot_control ::MybotHWInterface::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   if (!comms_.connected())
@@ -233,8 +233,8 @@ hardware_interface::return_type mybot_hardware ::MybotHardwareInterface::write(
   return hardware_interface::return_type::OK;
 }
 
-}  // namespace mybot_hardware
+}  // namespace mybot_control
 
 #include "pluginlib/class_list_macros.hpp"
 PLUGINLIB_EXPORT_CLASS(
-  mybot_hardware::MybotHardwareInterface, hardware_interface::SystemInterface)
+  mybot_control::MybotHWInterface, hardware_interface::SystemInterface)

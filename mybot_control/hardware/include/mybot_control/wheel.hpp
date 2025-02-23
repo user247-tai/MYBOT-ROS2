@@ -1,5 +1,5 @@
-#ifndef MYBOT_HARDWARE_WHEEL_HPP
-#define MYBOT_HARDWARE_WHEEL_HPP
+#ifndef MYBOT_CONTROL_WHEEL_HPP
+#define MYBOT_CONTROL_WHEEL_HPP
 
 #include <string>
 #include <cmath>
@@ -40,4 +40,4 @@ class Wheel
 };
 
 
-#endif // MYBOT_HARDWARE_WHEEL_HPP
+#endif // MYBOT_CONTROL_WHEEL_HPP

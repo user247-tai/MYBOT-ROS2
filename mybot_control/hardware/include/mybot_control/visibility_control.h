@@ -19,38 +19,38 @@
  * library cannot have, but the consuming code must have inorder to link.
  */
 
-#ifndef MYBOT_HARDWARE__VISIBILITY_CONTROL_H_
-#define MYBOT_HARDWARE__VISIBILITY_CONTROL_H_
+#ifndef MYBOT_CONTROL__VISIBILITY_CONTROL_H_
+#define MYBOT_CONTROL__VISIBILITY_CONTROL_H_
 
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __GNUC__
-#define MYBOT_HARDWARE_EXPORT __attribute__((dllexport))
-#define MYBOT_HARDWARE_IMPORT __attribute__((dllimport))
+#define MYBOT_CONTROL_EXPORT __attribute__((dllexport))
+#define MYBOT_CONTROL_IMPORT __attribute__((dllimport))
 #else
-#define MYBOT_HARDWARE_EXPORT __declspec(dllexport)
-#define MYBOT_HARDWARE_IMPORT __declspec(dllimport)
+#define MYBOT_CONTROL_EXPORT __declspec(dllexport)
+#define MYBOT_CONTROL_IMPORT __declspec(dllimport)
 #endif
-#ifdef MYBOT_HARDWARE_BUILDING_DLL
-#define MYBOT_HARDWARE_PUBLIC MYBOT_HARDWARE_EXPORT
+#ifdef MYBOT_CONTROL_BUILDING_DLL
+#define MYBOT_CONTROL_PUBLIC MYBOT_CONTROL_EXPORT
 #else
-#define MYBOT_HARDWARE_PUBLIC MYBOT_HARDWARE_IMPORT
+#define MYBOT_CONTROL_PUBLIC MYBOT_CONTROL_IMPORT
 #endif
-#define MYBOT_HARDWARE_PUBLIC_TYPE MYBOT_HARDWARE_PUBLIC
-#define MYBOT_HARDWARE_LOCAL
+#define MYBOT_CONTROL_PUBLIC_TYPE MYBOT_CONTROL_PUBLIC
+#define MYBOT_CONTROL_LOCAL
 #else
-#define MYBOT_HARDWARE_EXPORT __attribute__((visibility("default")))
-#define MYBOT_HARDWARE_IMPORT
+#define MYBOT_CONTROL_EXPORT __attribute__((visibility("default")))
+#define MYBOT_CONTROL_IMPORT
 #if __GNUC__ >= 4
-#define MYBOT_HARDWARE_PUBLIC __attribute__((visibility("default")))
-#define MYBOT_HARDWARE_LOCAL __attribute__((visibility("hidden")))
+#define MYBOT_CONTROL_PUBLIC __attribute__((visibility("default")))
+#define MYBOT_CONTROL_LOCAL __attribute__((visibility("hidden")))
 #else
-#define MYBOT_HARDWARE_PUBLIC
-#define MYBOT_HARDWARE_LOCAL
+#define MYBOT_CONTROL_PUBLIC
+#define MYBOT_CONTROL_LOCAL
 #endif
-#define MYBOT_HARDWARE_PUBLIC_TYPE
+#define MYBOT_CONTROL_PUBLIC_TYPE
 #endif
 
-#endif  // MYBOT_HARDWARE__VISIBILITY_CONTROL_H_
+#endif  // MYBOT_CONTROL__VISIBILITY_CONTROL_H_
