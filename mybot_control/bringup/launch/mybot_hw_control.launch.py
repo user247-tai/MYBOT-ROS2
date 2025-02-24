@@ -1,3 +1,4 @@
+import os
 from launch import LaunchDescription
 from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
@@ -5,6 +6,8 @@ from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
+
 
 
 def generate_launch_description():
@@ -53,7 +56,7 @@ def generate_launch_description():
     robot_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["diffbot_base_controller", "--controller-manager", "/controller_manager"],
+        arguments=["mybot_controller", "--controller-manager", "/controller_manager"],
     )
 
     # Delay start of robot_controller after `joint_state_broadcaster`
@@ -64,11 +67,30 @@ def generate_launch_description():
         )
     )
 
+    laser_driver = Node(
+            package="rplidar_ros",
+            executable="rplidar_node",
+            name="rplidar_node",
+            parameters=[os.path.join(
+                get_package_share_directory("mybot_control"),
+                "config",
+                "rplidar_a1.yaml"
+            )],
+            output="screen"
+    )
+
+    # convert = Node(
+    #     package="mybot_control",
+    #     executable="convert",
+    #     name="convert"
+    # )
+
     nodes = [
         control_node,
         robot_state_pub_node,
         joint_state_broadcaster_spawner,
         delay_robot_controller_spawner_after_joint_state_broadcaster_spawner,
+        laser_driver
     ]
 
     return LaunchDescription(nodes)

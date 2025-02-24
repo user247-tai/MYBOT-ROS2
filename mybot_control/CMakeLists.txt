@@ -11,6 +11,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
   rclcpp
   rclcpp_lifecycle
+  geometry_msgs
 )
 
 # find dependencies
@@ -26,11 +27,13 @@ add_library(
   SHARED
   hardware/diffbot_system.cpp
 )
+
 target_compile_features(mybot_control PUBLIC cxx_std_17)
 target_include_directories(mybot_control PUBLIC
 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/hardware/include>
 $<INSTALL_INTERFACE:include/mybot_control>
 )
+
 ament_target_dependencies(
   mybot_control PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -51,11 +54,11 @@ install(
   DESTINATION include/mybot_control
 )
 install(
-  DIRECTORY description/ros2_control description/urdf
+  DIRECTORY description/ros2_control description/urdf description/rviz description/launch 
   DESTINATION share/mybot_control
 )
 install(
-  DIRECTORY bringup/launch bringup/config
+  DIRECTORY bringup/launch bringup/config config
   DESTINATION share/mybot_control
 )
 install(TARGETS mybot_control

@@ -132,16 +132,16 @@ controller_server:
       # rotate_to_goal_heading: true
       
       plugin: "vector_pursuit_controller::VectorPursuitController"
-      k: 10.0 #5.0
-      desired_linear_vel: 0.7 #0.5
+      k: 20.0 #5.0
+      desired_linear_vel: 1.0 #0.5
       min_turning_radius: 0.25
-      lookahead_dist: 1.0
+      lookahead_dist: 1.5
       min_lookahead_dist: 0.5
-      max_lookahead_dist: 1.5
+      max_lookahead_dist: 2.0
       lookahead_time: 1.5
-      rotate_to_heading_angular_vel: 0.5
+      rotate_to_heading_angular_vel: 1.0
       transform_tolerance: 0.1
-      use_velocity_scaled_lookahead_dist: false
+      use_velocity_scaled_lookahead_dist: true
       min_linear_velocity: 0.0
       min_approach_linear_velocity: 0.05
       approach_velocity_scaling_dist: 0.5
@@ -154,12 +154,12 @@ controller_server:
       use_rotate_to_heading: true
       allow_reversing: false
       rotate_to_heading_min_angle: 0.5
-      max_angular_accel: 6.0
+      max_angular_accel: 3.0
       max_linear_accel: 3.0 #2.0
       max_lateral_accel: 0.7 #0.2
       max_robot_pose_search_dist: 10.0
       use_interpolation: true
-      use_heading_from_path: false
+      use_heading_from_path: true
       approach_velocity_scaling_dist: 1.0
 
 # controller_server:
@@ -380,7 +380,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         inflation_radius: 0.5 #Khoảng cách mở rộng từ vật thể.
-        cost_scaling_factor: 3.0 #Mức độ ảnh hưởng của vùng lạm phát.
+        cost_scaling_factor: 2.0 #Mức độ ảnh hưởng của vùng lạm phát.
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -503,7 +503,7 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.7 #0.5 #Đây là độ chính xác mà robot sẽ sử dụng khi lập kế hoạch.
+      tolerance: 0.9 #0.5 #Đây là độ chính xác mà robot sẽ sử dụng khi lập kế hoạch.
       use_astar: false #quyết định liệu thuật toán AStar có được sử dụng trong quá trình lập kế hoạch hay không
       allow_unknown: true #xác định liệu robot có thể đi qua các vùng chưa được biết đến (unknown) trong bản đồ hay không
 
@@ -579,19 +579,19 @@ smoother_server:
         fn_tol: 0.000000000000001
         param_tol: 0.00000000000000000001
 
-# velocity_smoother:
-#   ros__parameters:
-#     smoothing_frequency: 20.0
-#     scale_velocities: False
-#     feedback: "OPEN_LOOP"
-#     max_velocity: [0.5, 0.0, 2.0]
-#     min_velocity: [-0.5, 0.0, -2.0]
-#     max_accel: [2.5, 0.0, 3.2]
-#     max_decel: [-2.5, 0.0, -3.2]
-#     odom_topic: "odom"
-#     odom_duration: 0.1
-#     deadband_velocity: [0.0, 0.0, 0.0]
-#     velocity_timeout: 1.0 
+velocity_smoother:
+  ros__parameters:
+    smoothing_frequency: 20.0
+    scale_velocities: False
+    feedback: "OPEN_LOOP"
+    max_velocity: [1.0, 0.0, 2.0]
+    min_velocity: [-1.0, 0.0, -2.0]
+    max_accel: [2.5, 0.0, 3.2]
+    max_decel: [-2.5, 0.0, -3.2]
+    odom_topic: "odom"
+    odom_duration: 0.1
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0 
 
 # collision_monitor:
 #   ros__parameters:

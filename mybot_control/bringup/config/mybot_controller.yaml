@@ -12,7 +12,7 @@ controller_manager:
 mybot_controller:
   ros__parameters:
     type        : diff_drive_controller/DiffDriveController
-    use_stamped_vel: true
+    use_stamped_vel: false
     left_wheel_names  : ['left_engine_left_wheel_joint']
     right_wheel_names : ['right_engine_right_wheel_joint']
 
