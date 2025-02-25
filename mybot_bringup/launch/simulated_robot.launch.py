@@ -9,11 +9,31 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     use_slam = LaunchConfiguration("use_slam")
+    use_navigation = LaunchConfiguration("use_navigation")
+    use_navslam = LaunchConfiguration("use_navslam")
 
     use_slam_arg = DeclareLaunchArgument(
         "use_slam",
         default_value="false"
     )
+
+    use_navigation_arg = DeclareLaunchArgument(
+        "use_navigation",
+        default_value="false"
+    )
+
+    use_navslam_arg = DeclareLaunchArgument(
+        "use_navslam",
+        default_value="false"
+    )
+
+    param_file_name = "navslam_params" + '.yaml'
+    param_dir = LaunchConfiguration(
+        'params_file',
+        default=os.path.join(
+            get_package_share_directory('mybot_bringup'),
+            'config',
+            param_file_name))
 
     gazebo = IncludeLaunchDescription(
         os.path.join(
@@ -46,7 +66,7 @@ def generate_launch_description():
             "launch",
             "navigation2.launch.py"
         ),
-        condition=UnlessCondition(use_slam)
+        condition=IfCondition(use_navigation)
     )
 
     slam = IncludeLaunchDescription(
@@ -57,6 +77,26 @@ def generate_launch_description():
         ),
         condition=IfCondition(use_slam)
     )
+
+    navslam_navigation = IncludeLaunchDescription(
+        os.path.join(
+            get_package_share_directory("nav2_bringup"),
+            "launch",
+            "navigation_launch.py"
+        ),
+        condition=IfCondition(use_navslam),
+        launch_arguments={'params_file': param_dir}.items()
+
+    )
+
+    navslam_slam = IncludeLaunchDescription(
+        os.path.join(
+            get_package_share_directory("slam_toolbox"),
+            "launch",
+            "online_async_launch.py"
+        ),
+        condition=IfCondition(use_navslam)
+    ) 
 
     # rviz_localization = Node(
     #     package="rviz2",
@@ -72,25 +112,29 @@ def generate_launch_description():
     #     condition=UnlessCondition(use_slam)
     # )
 
-    rviz_slam = Node(
+    rviz_navslam = Node(
         package="rviz2",
         executable="rviz2",
         arguments=["-d", os.path.join(
-                get_package_share_directory("mybot_slam"),
+                get_package_share_directory("mybot_bringup"),
                 "rviz",
-                "slam.rviz"
+                "rviz_navslam.rviz"
             )
         ],
         output="screen",
         parameters=[{"use_sim_time": True}],
-        condition=IfCondition(use_slam)
+        condition=IfCondition(use_navslam)
     )
     
     return LaunchDescription([
         use_slam_arg,
+        use_navigation_arg,
+        use_navslam_arg,
         gazebo,
         controller,
         slam,
-        rviz_slam,
-        navigation
+        rviz_navslam,
+        navigation,
+        navslam_navigation,
+        navslam_slam
     ])
