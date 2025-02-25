@@ -16,3 +16,8 @@ An autonomous differential wheeled robot using ROS2 Humble
 4. Run Navigation
 
    ![image](https://github.com/user-attachments/assets/9fbcd1b3-213d-4c5e-8413-0119fa65253f)
+
+5. Run Navigation & SLAM simultaneously
+
+   ![image](https://github.com/user-attachments/assets/477c295b-a7dd-4bfc-8a88-de4716fb33f6)
+
