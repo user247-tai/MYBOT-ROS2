@@ -8,7 +8,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY launch 
+  DIRECTORY launch config rviz ../mybot_navigation/launch 
   DESTINATION share/${PROJECT_NAME}
 )
 
