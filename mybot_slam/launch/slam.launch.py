@@ -41,7 +41,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"save_map_timeout": 5.0},
-            {"use_sim_time": use_sim_time},
+            {"use_sim_time": False},
             {"free_thresh_default", "0.196"},
             {"occupied_thresh_default", "0.65"},
         ],
@@ -54,7 +54,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             slam_config,
-            {"use_sim_time": use_sim_time},
+            {"use_sim_time": False},
         ],
     )
 
@@ -65,19 +65,19 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"node_names": lifecycle_nodes},
-            {"use_sim_time": use_sim_time},
+            {"use_sim_time": False},
             {"autostart": True}
         ],
     )
 
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config_dir],
-        parameters=[{'use_sim_time': use_sim_time}],
-        output='screen'
-    )
+    # rviz = Node(
+    #     package='rviz2',
+    #     executable='rviz2',
+    #     name='rviz2',
+    #     arguments=['-d', rviz_config_dir],
+    #     parameters=[{'use_sim_time': False}],
+    #     output='screen'
+    # )
 
     return LaunchDescription([
         use_sim_time_arg,
@@ -85,5 +85,5 @@ def generate_launch_description():
         nav2_map_saver,
         slam_toolbox,
         nav2_lifecycle_manager,
-        rviz
+        # rviz
     ])

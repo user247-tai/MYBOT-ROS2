@@ -1,0 +1,92 @@
+neo_localization2_node:
+  ros__parameters:
+    base_frame: "base_footprint"
+    odom_frame: "odom"
+    # exponential low pass gain for localization update (0 to 1)
+    #   (higher gain means odometry is less used / relied on)
+    update_gain: 0.8 #Hệ số lọc (low pass filter) ảnh hưởng đến tốc độ cập nhật vị trí (0 đến 1). Giá trị cao hơn = phản ứng nhanh hơn nhưng có thể gây nhiễu.
+
+    # time based confidence gain when in 2D / 1D mode
+    confidence_gain: 0.01 #Hệ số tin cậy khi robot ở chế độ 2D hoặc 1D.
+
+    # how many particles (samples) to spread (per update)
+    sample_rate: 10 #Số lượng hạt (particles) được phát tán trong mỗi lần cập nhật.
+
+    # localization update rate [1/s]
+    loc_update_rate: 0.2 #Tần số cập nhật vị trí của robot (10)
+
+    # map tile update rate [1/s]
+    map_update_rate: 0.5 #Tần số cập nhật bản đồ. (10)
+
+    # map tile size in pixels
+    map_size: 1000
+
+    # how often to downscale (half) the original map
+    map_downscale: 0
+
+    # how many 3x3 gaussian smoothing iterations are applied to the map
+    num_smooth: 0 #Số lần làm mượt bản đồ bằng Gaussian.
+
+    # minimum score for valid localization (otherwise 0D mode)
+    #    higher values make it go into 0D mode earlier
+    min_score: 0.2
+
+    # odometry error in x and y [m/m] [1]
+    #    how fast to increase particle spread when in 1D / 0D mode
+    odometry_std_xy: 0.01
+
+    # odometry error in yaw angle [rad/rad] [1]
+    #    how fast to increase particle spread when in 0D mode
+    odometry_std_yaw: 0.01
+
+    # minimum particle spread in x and y [m]
+    min_sample_std_xy: 0.025 #Độ lan của hạt trong X, Y khi khởi động hoặc trong chế độ 0D.
+
+    # minimum particle spread in yaw angle [rad]
+    min_sample_std_yaw: 0.025 #Độ lan của hạt trong góc quay (rad).
+
+    # initial/maximum particle spread in x and y [m]
+    max_sample_std_xy: 0.5
+
+    # initial/maximum particle spread in yaw angle [rad]
+    max_sample_std_yaw: 0.5
+
+    # threshold for 1D / 2D position decision making (minimum average second order gradient)
+    #   if worst gradient direction is below this value we go into 1D mode
+    #   if both gradient directions are below we may go into 0D mode, depending on disable_threshold
+    #   higher values will make it go into 1D / 0D mode earlier
+    constrain_threshold: 0.1
+
+    # threshold for 1D / 2D decision making (with or without orientation)
+    #   higher values will make it go into 1D mode earlier
+    constrain_threshold_yaw: 0.2
+
+    # minimum number of points per update
+    min_points: 20
+
+    # solver update gain, lower gain = more stability / slower convergence
+    solver_gain: 0.1 #	Hệ số cập nhật bộ giải (solver), giá trị nhỏ = ổn định hơn nhưng hội tụ chậm hơn.
+
+    # solver update damping, higher damping = more stability / slower convergence
+    solver_damping: 1000.0 #Độ giảm dao động của solver, giá trị cao = ổn định hơn nhưng chậm hơn.
+
+    # number of gauss-newton iterations per sample per scan
+    solver_iterations: 20 #Số lần lặp thuật toán Gauss-Newton mỗi lần cập nhật.
+
+    # maximum wait for getting transforms [s]
+    transform_timeout: 0.2 #Thời gian chờ tối đa khi tìm transform (0.2s).
+
+    # if to broadcast map frame
+    broadcast_tf: true
+    # Scan topic
+    scan_topic: scan
+    # Initial Pose topic
+    initialpose: initialpose
+    # Map Tile topic
+    map_tile: map_tile
+    # Map Pose topic
+    map_pose: map_pose
+    # particle_cloud topic
+    particle_cloud: particlecloud
+    # amcl_pose topic
+    amcl_pose: amcl_pose

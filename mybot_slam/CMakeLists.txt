@@ -17,7 +17,7 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2 REQUIRED)
 
 install(
-  DIRECTORY launch config maps rviz
+  DIRECTORY launch config maps
   DESTINATION share/${PROJECT_NAME}
 )
 

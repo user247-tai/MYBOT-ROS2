@@ -15,12 +15,12 @@ def generate_launch_description():
 
     map_name_arg = DeclareLaunchArgument(
         "map_name",
-        default_value="small_house"
+        default_value="real_house"
     )
 
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
-        default_value="true"
+        default_value="false"
     )
 
     amcl_config_arg = DeclareLaunchArgument(
