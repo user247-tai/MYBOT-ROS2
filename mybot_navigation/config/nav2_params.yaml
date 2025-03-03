@@ -96,201 +96,201 @@ bt_navigator_rclcpp_node:
   ros__parameters:
     use_sim_time: True
 
-controller_server:
-  ros__parameters:
-    use_sim_time: True
-    controller_frequency: 10.0
-    min_x_velocity_threshold: 0.001 #Xác định ngưỡng vận tốc nhỏ nhất theo trục X mà controller server sẽ áp dụng
-    min_y_velocity_threshold: 0.0 #Xác định ngưỡng vận tốc nhỏ nhất theo trục Y (chỉ áp dụng với robot holonomic như Mecanum hoặc Omni-wheel)
-    min_theta_velocity_threshold: 0.001 
-    failure_tolerance: 0.3 #Xác định thời gian robot có thể không di chuyển mà không bị coi là thất bại, hệ thống sẽ coi là có lỗi và có thể thực hiện hành động recovery.
-    progress_checker_plugin: "progress_checker"
-    goal_checker_plugins: ["general_goal_checker"] 
-    controller_plugins: ["FollowPath"]
-
-    # Progress checker parameters
-    progress_checker:
-      plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.3 #0.5 #Khoảng cách tối thiểu robot phải di chuyển trong movement_time_allowance giây để không bị coi là bị kẹt.
-      movement_time_allowance: 7.0 #10.0 #Thời gian tối đa robot có thể đứng yên trước khi bị coi là bị kẹt.
-    
-    general_goal_checker:
-      stateful: True
-      plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25 #Robot sẽ coi là đến đích nếu khoảng cách tới điểm đến <= config
-      yaw_goal_tolerance: 0.25 #Sai số góc cho phép <= config (rad)
-
-    # DWB parameters
-    FollowPath:
-      plugin: "nav2_rotation_shim_controller::RotationShimController"
-      primary_controller: "dwb_core::DWBLocalPlanner"
-      angular_dist_threshold: 0.785
-      forward_sampling_distance: 0.5
-      rotate_to_heading_angular_vel: 1.8
-      max_angular_accel: 3.2
-      simulate_ahead_time: 1.0
-      rotate_to_goal_heading: false
-
-      debug_trajectory_details: True
-      min_vel_x: 0.0 #Vận tốc tuyến tính tối thiểu theo trục X (m/s).
-      min_vel_y: 0.0 #Vận tốc tối thiểu theo trục Y. (0.0 vì robot Differential Drive không di chuyển ngang.)
-      max_vel_x: 0.7 #Vận tốc tuyến tính tối đa theo trục X (m/s).
-      max_vel_y: 0.0 #Vận tốc tối đa theo trục Y. (0.0 vì robot không có Omnidirectional Drive.)
-      max_vel_theta: 1.5 #Vận tốc góc tối đa (rad/s).
-      min_speed_xy: 0.0 #Tốc độ tối thiểu khi di chuyển (m/s).
-      max_speed_xy: 0.7 #Tốc độ tối đa trong không gian XY. (Nên bằng max_vel_x.)
-      min_speed_theta: 0.0 #Tốc độ góc tối thiểu khi quay.
-      # Add high threshold velocity for turtlebot 3 issue.
-      # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
-      acc_lim_x: 2.5 #Gia tốc tối đa theo trục X (m/s²).
-      acc_lim_y: 0.0 #Gia tốc tối đa theo trục Y.(robot sử dụng Differential Drive không di chuyển ngang.)
-      acc_lim_theta: 3.2 #Gia tốc quay tối đa (rad/s²).
-      decel_lim_x: -2.5 #Giảm tốc tối đa theo trục X.
-      decel_lim_y: 0.0 #Giảm tốc tối đa theo trục Y.
-      decel_lim_theta: -3.2 #Giảm tốc quay tối đa (rad/s²).
-      vx_samples: 20 #Số lượng mẫu tốc độ trên trục X
-      vy_samples: 0 #Số lượng mẫu tốc độ trên trục Y (robot Differential Drive không di chuyển ngang).
-      vtheta_samples: 40 #Số lượng mẫu tốc độ xoay 
-      sim_time: 1.0 #xác định thời gian mô phỏng (simulation time) mà planner sử dụng để đánh giá và tính toán các quỹ đạo trong không gian trạng thái.
-      linear_granularity: 0.05 #quyết định độ phân giải khi lập kế hoạch tuyến tính (linear resolution) trong không gian XY
-      angular_granularity: 0.025 #xác định mức độ chi tiết trong các phép quay mà planner có thể thực hiện.
-      transform_tolerance: 0.2 #độ dung sai khi robot thực hiện các phép biến đổi (transformation),
-      xy_goal_tolerance: 0.05 # xác định khoảng cách tối đa giữa robot và mục tiêu mà robot vẫn được coi là "đã đến đích" khi di chuyển trong không gian XY
-      trans_stopped_velocity: 0.25 #Tham số này xác định vận tốc tối thiểu mà robot cần đạt được để hệ thống coi là đã dừng lại hoàn toàn.
-      short_circuit_trajectory_evaluation: True #ừng việc đánh giá các quỹ đạo không khả thi ngay lập tức, thay vì tiếp tục đánh giá toàn bộ các lựa chọn.
-      stateful: True # theo dõi trạng thái của robot và các quá trình liên quan đến hành động của nó, giúp điều chỉnh và đưa ra quyết định một cách thông minh hơn
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"] #các thành phần trong quá trình lập kế hoạch quỹ đạo mà giúp đánh giá và điều chỉnh hành vi của robot trong khi di chuyển. 
-      BaseObstacle.scale: 0.01 #Xác định độ nhạy của robot với chướng ngại vật.
-      PathAlign.scale: 20.0 #Xác định mức độ quan trọng của việc giữ robot trên đường đi.
-      PathAlign.forward_point_distance: 0.3 #Robot nhìn về phía trước xm để điều chỉnh hướng theo đường đi.
-      GoalAlign.scale: 24.0 #Xác định mức độ quan trọng của việc căn chỉnh hướng khi đến gần mục tiêu.
-      GoalAlign.forward_point_distance: 0.1 #Cách robot căn chỉnh hướng trước khi chạm mục tiêu.
-      PathDist.scale: 32.0 #Điều chỉnh khoảng cách giữa robot và quỹ đạo dự kiến.
-      GoalDist.scale: 24.0 #Điều chỉnh mức độ quan trọng của khoảng cách đến mục tiêu.
-      RotateToGoal.scale: 32.0 #xác định mức độ ảnh hưởng của critic RotateToGoal đối với việc căn chỉnh góc của robot khi tiếp cận mục tiêu.
-      RotateToGoal.slowing_factor: 5.0 #giúp điều chỉnh mức độ "chậm lại" của robot khi nó tiến gần tới mục tiêu 
-      RotateToGoal.lookahead_time: 1.0 #robot sẽ tính toán việc căn chỉnh góc trong một khoảng thời gian nhất định trước khi đến mục tiêu
-
 # controller_server:
 #   ros__parameters:
-#     controller_frequency: 20.0
-#     min_x_velocity_threshold: 0.001
-#     min_y_velocity_threshold: 0.5
-#     min_theta_velocity_threshold: 0.001
-#     progress_checker_plugins: ["progress_checker"]
-#     goal_checker_plugins: ["goal_checker"]
+#     use_sim_time: True
+#     controller_frequency: 10.0
+#     min_x_velocity_threshold: 0.001 #Xác định ngưỡng vận tốc nhỏ nhất theo trục X mà controller server sẽ áp dụng
+#     min_y_velocity_threshold: 0.0 #Xác định ngưỡng vận tốc nhỏ nhất theo trục Y (chỉ áp dụng với robot holonomic như Mecanum hoặc Omni-wheel)
+#     min_theta_velocity_threshold: 0.001 
+#     failure_tolerance: 0.3 #Xác định thời gian robot có thể không di chuyển mà không bị coi là thất bại, hệ thống sẽ coi là có lỗi và có thể thực hiện hành động recovery.
+#     progress_checker_plugin: "progress_checker"
+#     goal_checker_plugins: ["general_goal_checker"] 
 #     controller_plugins: ["FollowPath"]
+
+#     # Progress checker parameters
 #     progress_checker:
 #       plugin: "nav2_controller::SimpleProgressChecker"
-#       required_movement_radius: 0.5
-#       movement_time_allowance: 10.0
-#     goal_checker:
-#       plugin: "nav2_controller::SimpleGoalChecker"
-#       xy_goal_tolerance: 0.25
-#       yaw_goal_tolerance: 0.25
+#       required_movement_radius: 0.3 #0.5 #Khoảng cách tối thiểu robot phải di chuyển trong movement_time_allowance giây để không bị coi là bị kẹt.
+#       movement_time_allowance: 7.0 #10.0 #Thời gian tối đa robot có thể đứng yên trước khi bị coi là bị kẹt.
+    
+#     general_goal_checker:
 #       stateful: True
+#       plugin: "nav2_controller::SimpleGoalChecker"
+#       xy_goal_tolerance: 0.25 #Robot sẽ coi là đến đích nếu khoảng cách tới điểm đến <= config
+#       yaw_goal_tolerance: 0.25 #Sai số góc cho phép <= config (rad)
+
+#     # DWB parameters
 #     FollowPath:
-#       plugin: "nav2_mppi_controller::MPPIController"
-#       time_steps: 30
-#       model_dt: 0.1
-#       batch_size: 2000
-#       vx_std: 0.2
-#       vy_std: 0.2
-#       wz_std: 0.4
-#       vx_max: 0.7
-#       vx_min: -0.35
-#       vy_max: 0.0
-#       wz_max: 1.9
-#       ax_max: 3.0
-#       ax_min: -3.0
-#       ay_max: 3.0
-#       az_max: 3.5
-#       iteration_count: 1
-#       prune_distance: 1.7
-#       transform_tolerance: 0.1
-#       temperature: 0.3
-#       gamma: 0.015
-#       motion_model: "DiffDrive"
-#       visualize: false
-#       reset_period: 1.0 # (only in Humble)
-#       regenerate_noises: false
-#       TrajectoryVisualizer:
-#         trajectory_step: 5
-#         time_step: 3
-#       AckermannConstraints:
-#         min_turning_r: 0.2
-#       critics: ["ConstraintCritic", "CostCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic"]
-#       ConstraintCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 4.0
-#       GoalCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 5.0
-#         threshold_to_consider: 1.4
-#       GoalAngleCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 3.0
-#         threshold_to_consider: 0.5
-#       PreferForwardCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 5.0
-#         threshold_to_consider: 0.5
-#       ObstaclesCritic:
-#         enabled: true
-#         cost_power: 1
-#         repulsion_weight: 1.5
-#         critical_weight: 20.0
-#         consider_footprint: false
-#         collision_cost: 10000.0
-#         collision_margin_distance: 0.1
-#         near_goal_distance: 0.5
-#         inflation_radius: 0.55 # (only in Humble)
-#         cost_scaling_factor: 10.0 # (only in Humble)
-#       CostCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 3.81
-#         critical_cost: 300.0
-#         consider_footprint: true
-#         collision_cost: 1000000.0
-#         near_goal_distance: 1.0
-#         trajectory_point_step: 2
-#       PathAlignCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 14.0
-#         max_path_occupancy_ratio: 0.05
-#         trajectory_point_step: 4
-#         threshold_to_consider: 0.5
-#         offset_from_furthest: 20
-#         use_path_orientations: false
-#       PathFollowCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 5.0
-#         offset_from_furthest: 5
-#         threshold_to_consider: 1.4
-#       PathAngleCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 2.0
-#         offset_from_furthest: 4
-#         threshold_to_consider: 0.5
-#         max_angle_to_furthest: 1.0
-#         mode: 0
-#       VelocityDeadbandCritic:
-#         enabled: true
-#         cost_power: 1
-#         cost_weight: 35.0
-#         deadband_velocities: [0.05, 0.05, 0.05]
-#       TwirlingCritic:
-#         enabled: true
-#         twirling_cost_power: 1
-#         twirling_cost_weight: 10.0
+#       plugin: "nav2_rotation_shim_controller::RotationShimController"
+#       primary_controller: "dwb_core::DWBLocalPlanner"
+#       angular_dist_threshold: 0.785
+#       forward_sampling_distance: 0.5
+#       rotate_to_heading_angular_vel: 1.8
+#       max_angular_accel: 3.2
+#       simulate_ahead_time: 1.0
+#       rotate_to_goal_heading: false
+
+#       debug_trajectory_details: True
+#       min_vel_x: 0.0 #Vận tốc tuyến tính tối thiểu theo trục X (m/s).
+#       min_vel_y: 0.0 #Vận tốc tối thiểu theo trục Y. (0.0 vì robot Differential Drive không di chuyển ngang.)
+#       max_vel_x: 0.7 #Vận tốc tuyến tính tối đa theo trục X (m/s).
+#       max_vel_y: 0.0 #Vận tốc tối đa theo trục Y. (0.0 vì robot không có Omnidirectional Drive.)
+#       max_vel_theta: 1.5 #Vận tốc góc tối đa (rad/s).
+#       min_speed_xy: 0.0 #Tốc độ tối thiểu khi di chuyển (m/s).
+#       max_speed_xy: 0.7 #Tốc độ tối đa trong không gian XY. (Nên bằng max_vel_x.)
+#       min_speed_theta: 0.0 #Tốc độ góc tối thiểu khi quay.
+#       # Add high threshold velocity for turtlebot 3 issue.
+#       # https://github.com/ROBOTIS-GIT/turtlebot3_simulations/issues/75
+#       acc_lim_x: 2.5 #Gia tốc tối đa theo trục X (m/s²).
+#       acc_lim_y: 0.0 #Gia tốc tối đa theo trục Y.(robot sử dụng Differential Drive không di chuyển ngang.)
+#       acc_lim_theta: 3.2 #Gia tốc quay tối đa (rad/s²).
+#       decel_lim_x: -2.5 #Giảm tốc tối đa theo trục X.
+#       decel_lim_y: 0.0 #Giảm tốc tối đa theo trục Y.
+#       decel_lim_theta: -3.2 #Giảm tốc quay tối đa (rad/s²).
+#       vx_samples: 20 #Số lượng mẫu tốc độ trên trục X
+#       vy_samples: 0 #Số lượng mẫu tốc độ trên trục Y (robot Differential Drive không di chuyển ngang).
+#       vtheta_samples: 40 #Số lượng mẫu tốc độ xoay 
+#       sim_time: 1.0 #xác định thời gian mô phỏng (simulation time) mà planner sử dụng để đánh giá và tính toán các quỹ đạo trong không gian trạng thái.
+#       linear_granularity: 0.05 #quyết định độ phân giải khi lập kế hoạch tuyến tính (linear resolution) trong không gian XY
+#       angular_granularity: 0.025 #xác định mức độ chi tiết trong các phép quay mà planner có thể thực hiện.
+#       transform_tolerance: 0.2 #độ dung sai khi robot thực hiện các phép biến đổi (transformation),
+#       xy_goal_tolerance: 0.05 # xác định khoảng cách tối đa giữa robot và mục tiêu mà robot vẫn được coi là "đã đến đích" khi di chuyển trong không gian XY
+#       trans_stopped_velocity: 0.25 #Tham số này xác định vận tốc tối thiểu mà robot cần đạt được để hệ thống coi là đã dừng lại hoàn toàn.
+#       short_circuit_trajectory_evaluation: True #ừng việc đánh giá các quỹ đạo không khả thi ngay lập tức, thay vì tiếp tục đánh giá toàn bộ các lựa chọn.
+#       stateful: True # theo dõi trạng thái của robot và các quá trình liên quan đến hành động của nó, giúp điều chỉnh và đưa ra quyết định một cách thông minh hơn
+#       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"] #các thành phần trong quá trình lập kế hoạch quỹ đạo mà giúp đánh giá và điều chỉnh hành vi của robot trong khi di chuyển. 
+#       BaseObstacle.scale: 0.01 #Xác định độ nhạy của robot với chướng ngại vật.
+#       PathAlign.scale: 20.0 #Xác định mức độ quan trọng của việc giữ robot trên đường đi.
+#       PathAlign.forward_point_distance: 0.3 #Robot nhìn về phía trước xm để điều chỉnh hướng theo đường đi.
+#       GoalAlign.scale: 24.0 #Xác định mức độ quan trọng của việc căn chỉnh hướng khi đến gần mục tiêu.
+#       GoalAlign.forward_point_distance: 0.1 #Cách robot căn chỉnh hướng trước khi chạm mục tiêu.
+#       PathDist.scale: 32.0 #Điều chỉnh khoảng cách giữa robot và quỹ đạo dự kiến.
+#       GoalDist.scale: 24.0 #Điều chỉnh mức độ quan trọng của khoảng cách đến mục tiêu.
+#       RotateToGoal.scale: 32.0 #xác định mức độ ảnh hưởng của critic RotateToGoal đối với việc căn chỉnh góc của robot khi tiếp cận mục tiêu.
+#       RotateToGoal.slowing_factor: 5.0 #giúp điều chỉnh mức độ "chậm lại" của robot khi nó tiến gần tới mục tiêu 
+#       RotateToGoal.lookahead_time: 1.0 #robot sẽ tính toán việc căn chỉnh góc trong một khoảng thời gian nhất định trước khi đến mục tiêu
+
+controller_server:
+  ros__parameters:
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    progress_checker_plugins: ["progress_checker"]
+    goal_checker_plugins: ["goal_checker"]
+    controller_plugins: ["FollowPath"]
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 10.0
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
+      stateful: True
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+      time_steps: 30
+      model_dt: 0.1
+      batch_size: 2000
+      vx_std: 0.2
+      vy_std: 0.2
+      wz_std: 0.4
+      vx_max: 0.7
+      vx_min: -0.35
+      vy_max: 0.0
+      wz_max: 1.9
+      ax_max: 3.0
+      ax_min: -3.0
+      ay_max: 3.0
+      az_max: 3.5
+      iteration_count: 1
+      prune_distance: 1.7
+      transform_tolerance: 0.1
+      temperature: 0.3
+      gamma: 0.015
+      motion_model: "DiffDrive"
+      visualize: false
+      reset_period: 1.0 # (only in Humble)
+      regenerate_noises: false
+      TrajectoryVisualizer:
+        trajectory_step: 5
+        time_step: 3
+      AckermannConstraints:
+        min_turning_r: 0.2
+      critics: ["ConstraintCritic", "CostCritic", "GoalCritic", "GoalAngleCritic", "PathAlignCritic", "PathFollowCritic", "PathAngleCritic", "PreferForwardCritic"]
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 4.0
+      GoalCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        threshold_to_consider: 1.4
+      GoalAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+        threshold_to_consider: 0.5
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        threshold_to_consider: 0.5
+      ObstaclesCritic:
+        enabled: true
+        cost_power: 1
+        repulsion_weight: 1.5
+        critical_weight: 20.0
+        consider_footprint: false
+        collision_cost: 10000.0
+        collision_margin_distance: 0.1
+        near_goal_distance: 0.5
+        inflation_radius: 0.55 # (only in Humble)
+        cost_scaling_factor: 10.0 # (only in Humble)
+      CostCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.81
+        critical_cost: 300.0
+        consider_footprint: true
+        collision_cost: 1000000.0
+        near_goal_distance: 1.0
+        trajectory_point_step: 2
+      PathAlignCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 14.0
+        max_path_occupancy_ratio: 0.05
+        trajectory_point_step: 4
+        threshold_to_consider: 0.5
+        offset_from_furthest: 20
+        use_path_orientations: false
+      PathFollowCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        offset_from_furthest: 5
+        threshold_to_consider: 1.4
+      PathAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 2.0
+        offset_from_furthest: 4
+        threshold_to_consider: 0.5
+        max_angle_to_furthest: 1.0
+        mode: 0
+      VelocityDeadbandCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 35.0
+        deadband_velocities: [0.05, 0.05, 0.05]
+      TwirlingCritic:
+        enabled: true
+        twirling_cost_power: 1
+        twirling_cost_weight: 10.0
 
 controller_server_rclcpp_node:
   ros__parameters:
