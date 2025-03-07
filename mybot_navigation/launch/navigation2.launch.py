@@ -36,6 +36,9 @@ def generate_launch_description():
             get_package_share_directory('mybot_navigation'),
             'map',
             'map.yaml'))
+    
+    costmap_filter_dir = get_package_share_directory('nav2_costmap_filters_demo')
+    cosmap_filter_launch_dir = os.path.join(costmap_filter_dir, 'launch')
 
     param_file_name = "nav2_params" + '.yaml'
     param_dir = LaunchConfiguration(
@@ -53,6 +56,7 @@ def generate_launch_description():
         'nav2_default_view.rviz')
 
     return LaunchDescription([
+
         DeclareLaunchArgument(
             'map',
             default_value=map_dir,
@@ -75,6 +79,30 @@ def generate_launch_description():
                 'use_sim_time': use_sim_time,
                 'params_file': param_dir}.items(),
         ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
+            launch_arguments={
+                'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
+                'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/keepout_mask.yaml',
+            }.items(),
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
+            launch_arguments={
+                'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/speed_params.yaml',
+                'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/speed_mask.yaml',
+            }.items(),
+        ),
+
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
+        #     launch_arguments={
+        #         'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
+        #         'mask': '/root/taste_ws/src/tasteRobot2/dbot_navigation2/map/keepout_mask.yaml',
+        #     }.items(),
+        # ),
 
         Node(
             package='rviz2',

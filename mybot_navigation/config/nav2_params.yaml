@@ -177,6 +177,7 @@ controller_server:
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
+    speed_limit_topic: "/speed_limit"
     progress_checker_plugins: ["progress_checker"]
     goal_checker_plugins: ["goal_checker"]
     controller_plugins: ["FollowPath"]
@@ -368,6 +369,8 @@ global_costmap:
       track_unknown_space: true #theo dõi không gian chưa biết
       # plugins: ["static_layer", "obstacle_layer", "voxel_layer", "inflation_layer"]
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      filters: ["keepout_filter", "speed_filter"]
+      # filters: ["keepout_filter"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -409,6 +412,17 @@ global_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
         inflation_radius: 0.55
+      keepout_filter:
+        plugin: "nav2_costmap_2d::KeepoutFilter"
+        enabled: True
+        filter_info_topic: "/costmap_filter_info"
+      speed_filter:
+        plugin: "nav2_costmap_2d::SpeedFilter"
+        enabled: True
+        filter_info_topic: "/costmap_speed_filter_info"
+        speed_limit_topic: "/speed_limit"
+
+      
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
