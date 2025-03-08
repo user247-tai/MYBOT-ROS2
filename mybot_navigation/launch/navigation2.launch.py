@@ -1,42 +1,33 @@
-# Copyright 2019 Open Source Robotics Foundation, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# Author: Darby Lim
-
 import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
-
-
 
 def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
+
     use_rviz = LaunchConfiguration('use_rviz', default='true')
-    map_dir = LaunchConfiguration(
-        'map',
-        default=os.path.join(
-            get_package_share_directory('mybot_navigation'),
-            'map',
-            'map.yaml'))
-    
+
+    map_name = LaunchConfiguration("map_name")
+
+    use_filters = LaunchConfiguration("use_filters")
+
+    map_path = PathJoinSubstitution([
+        get_package_share_directory("mybot_navigation"),
+        "maps",
+        map_name,
+        "map.yaml"
+    ])
+
+    use_amcl = LaunchConfiguration("use_amcl")
+
+
     costmap_filter_dir = get_package_share_directory('nav2_costmap_filters_demo')
     cosmap_filter_launch_dir = os.path.join(costmap_filter_dir, 'launch')
 
@@ -58,9 +49,14 @@ def generate_launch_description():
     return LaunchDescription([
 
         DeclareLaunchArgument(
-            'map',
-            default_value=map_dir,
-            description='Full path to map file to load'),
+            "map_name",
+            default_value="small_house",
+            description="Map name"),
+
+        DeclareLaunchArgument(
+            "use_amcl",
+            default_value="false",
+            description="Use AMCL or another for localization"),      
 
         DeclareLaunchArgument(
             'params_file',
@@ -72,38 +68,59 @@ def generate_launch_description():
             default_value='true',
             description='Use simulation (Gazebo) clock if true'),
 
+        DeclareLaunchArgument(
+            'use_filters',
+            default_value='true',
+            description='Use filters in map'),
+
+        #AMCL_Navigation
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([nav2_launch_file_dir, '/bringup_launch.py']),
             launch_arguments={
-                'map': map_dir,
+                'map': map_path,
                 'use_sim_time': use_sim_time,
                 'params_file': param_dir}.items(),
+            condition = IfCondition(use_amcl)
         ),
 
+        #Neo Navigation
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([nav2_launch_file_dir, '/navigation_launch.py']),
+            launch_arguments={'params_file': param_dir}.items(),
+            condition=UnlessCondition(use_amcl)
+        ),
+
+        #Neo
+        IncludeLaunchDescription(
+            os.path.join(
+                get_package_share_directory("neo_localization2"),
+                "launch",
+                "test_setup.launch.py"
+            ),
+            condition=UnlessCondition(use_amcl)
+        ),
+
+        #Keepout filter
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
             launch_arguments={
                 'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
                 'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/keepout_mask.yaml',
             }.items(),
+            condition=IfCondition(use_filters)
         ),
 
+        #Speed filter
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
             launch_arguments={
                 'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/speed_params.yaml',
                 'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/speed_mask.yaml',
             }.items(),
+            condition=IfCondition(use_filters)
         ),
-
-        # IncludeLaunchDescription(
-        #     PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
-        #     launch_arguments={
-        #         'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
-        #         'mask': '/root/taste_ws/src/tasteRobot2/dbot_navigation2/map/keepout_mask.yaml',
-        #     }.items(),
-        # ),
-
+        
+        #Rviz2
         Node(
             package='rviz2',
             executable='rviz2',

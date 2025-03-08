@@ -11,6 +11,8 @@ def generate_launch_description():
     use_slam = LaunchConfiguration("use_slam")
     use_navigation = LaunchConfiguration("use_navigation")
     use_navslam = LaunchConfiguration("use_navslam")
+    use_amcl = LaunchConfiguration("use_amcl")
+    use_filters = LaunchConfiguration("use_filters")
 
     use_slam_arg = DeclareLaunchArgument(
         "use_slam",
@@ -25,6 +27,16 @@ def generate_launch_description():
     use_navslam_arg = DeclareLaunchArgument(
         "use_navslam",
         default_value="false"
+    )
+
+    use_amcl_arg = DeclareLaunchArgument(
+        "use_amcl",
+        default_value="false"
+    )
+
+    use_filters_arg = DeclareLaunchArgument(
+        'use_filters',
+        default_value='true'
     )
 
     param_file_name = "navslam_params" + '.yaml'
@@ -66,6 +78,10 @@ def generate_launch_description():
             "launch",
             "navigation2.launch.py"
         ),
+        launch_arguments={
+            'use_amcl': use_amcl,
+            'use_filters': use_filters}.items()
+        ,
         condition=IfCondition(use_navigation)
     )
 
@@ -130,6 +146,8 @@ def generate_launch_description():
         use_slam_arg,
         use_navigation_arg,
         use_navslam_arg,
+        use_amcl_arg,
+        use_filters_arg,
         gazebo,
         controller,
         slam,
