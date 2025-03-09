@@ -7,3 +7,4 @@ rplidar_node:
     inverted: false
     angle_compensate: true
     scan_mode: Sensitivity
+    scan_frequency: 10.0

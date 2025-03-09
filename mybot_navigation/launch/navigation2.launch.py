@@ -20,7 +20,7 @@ def generate_launch_description():
 
     use_amcl_arg = DeclareLaunchArgument(
         "use_amcl",
-        default_value="true"
+        default_value="false"
     )
 
     param_dir = LaunchConfiguration(

@@ -23,8 +23,8 @@
     <xacro:property name="lidar_radius" value="0.035" />
     <xacro:property name="lidar_length" value="0.025" />
 
-    <xacro:property name="wheel_radius" value="0.033" />
-    <xacro:property name="wheel_length" value="0.027" />
+    <xacro:property name="wheel_radius" value="0.0425" />
+    <xacro:property name="wheel_length" value="0.038" />
 
     <link name="${prefix}base_footprint" />
 
@@ -46,7 +46,61 @@
                            xyz="0 0 ${base_height / 2.0}" rpy="0 0 0" />
     </link>
 
-    <link name="${prefix}caster_base_front_link">
+    <link name="${prefix}caster_base_front_left_link">
+        <visual>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="blue" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <xacro:box_inertia m="5.0" l="${2*caster_base_length}" w="${2*caster_base_width}" h="${2*caster_base_height}"
+                           xyz="0 0 ${caster_base_height / 2.0}" rpy="0 0 0" />
+    </link>
+
+    <link name="${prefix}caster_base_front_right_link">
+        <visual>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="blue" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <xacro:box_inertia m="5.0" l="${2*caster_base_length}" w="${2*caster_base_width}" h="${2*caster_base_height}"
+                           xyz="0 0 ${caster_base_height / 2.0}" rpy="0 0 0" />
+    </link>      
+
+    <link name="${prefix}caster_base_back_left_link">
+        <visual>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="blue" />
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <xacro:box_inertia m="5.0" l="${2*caster_base_length}" w="${2*caster_base_width}" h="${2*caster_base_height}"
+                           xyz="0 0 ${caster_base_height / 2.0}" rpy="0 0 0" />
+    </link>
+
+    <link name="${prefix}caster_base_back_right_link">
         <visual>
             <geometry>
                 <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
@@ -63,24 +117,6 @@
         <xacro:box_inertia m="5.0" l="${2*caster_base_length}" w="${2*caster_base_width}" h="${2*caster_base_height}"
                            xyz="0 0 ${caster_base_height / 2.0}" rpy="0 0 0" />
     </link>    
-
-    <link name="${prefix}caster_base_back_link">
-        <visual>
-            <geometry>
-                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
-            </geometry>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-            <material name="blue" />
-        </visual>
-        <collision>
-            <geometry>
-                <box size="${caster_base_length} ${caster_base_width} ${caster_base_height}" />
-            </geometry>
-            <origin xyz="0 0 0" rpy="0 0 0" />
-        </collision>
-        <xacro:box_inertia m="5.0" l="${2*caster_base_length}" w="${2*caster_base_width}" h="${2*caster_base_height}"
-                           xyz="0 0 ${caster_base_height / 2.0}" rpy="0 0 0" />
-    </link>  
 
     <link name="${prefix}left_engine_link">
         <visual>
@@ -154,7 +190,7 @@
                                 xyz="0 0 0" rpy="${pi / 2.0} 0 0" />
     </link>
 
-    <link name="${prefix}caster_wheel_front_link">
+    <link name="${prefix}caster_wheel_front_left_link">
         <visual>
             <geometry>
                 <sphere radius="${wheel_radius / 2.0}" />
@@ -172,7 +208,44 @@
                               xyz="0 0 0" rpy="0 0 0" />
     </link>
 
-      <link name="${prefix}caster_wheel_back_link">
+    <link name="${prefix}caster_wheel_front_right_link">
+        <visual>
+            <geometry>
+                <sphere radius="${wheel_radius / 2.0}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="grey" />
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="${wheel_radius / 2.0}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <xacro:sphere_inertia m="0.5" r="${2*wheel_radius / 2.0}"
+                              xyz="0 0 0" rpy="0 0 0" />
+    </link>
+
+    <link name="${prefix}caster_wheel_back_left_link">
+        <visual>
+            <geometry>
+                <sphere radius="${wheel_radius / 2.0}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="grey" />
+        </visual>
+        <collision>
+            <geometry>
+                <sphere radius="${wheel_radius / 2.0}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+        </collision>
+        <xacro:sphere_inertia m="0.5" r="${2*wheel_radius / 2.0}"
+                              xyz="0 0 0" rpy="0 0 0" />
+    </link>
+
+
+    <link name="${prefix}caster_wheel_back_right_link">
         <visual>
             <geometry>
                 <sphere radius="${wheel_radius / 2.0}" />
@@ -244,41 +317,65 @@
         <origin xyz="0 ${(base_width - engine_width) / 2.0} ${-(engine_height) / 2.0}" rpy="0 0 0"/>
     </joint>
 
-    <joint name="${prefix}base_caster_base_front_joint" type="fixed">
+    <joint name="${prefix}base_caster_base_front_left_joint" type="fixed">
         <parent link="${prefix}base_link" />
-        <child link="${prefix}caster_base_front_link" />
-        <origin xyz="${base_length / 2.5} 0 ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
+        <child link="${prefix}caster_base_front_left_link" />
+        <origin xyz="${base_length / 2.5} ${-(base_width) / 4 } ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
     </joint>    
 
-    <joint name="${prefix}base_caster_base_back_joint" type="fixed">
+    <joint name="${prefix}base_caster_base_front_right_joint" type="fixed">
         <parent link="${prefix}base_link" />
-        <child link="${prefix}caster_base_back_link" />
-        <origin xyz="${-base_length / 2.5} 0 ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
+        <child link="${prefix}caster_base_front_right_link" />
+        <origin xyz="${base_length / 2.5} ${(base_width) / 4 } ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
+    </joint> 
+
+    <joint name="${prefix}base_caster_base_back_left_joint" type="fixed">
+        <parent link="${prefix}base_link" />
+        <child link="${prefix}caster_base_back_left_link" />
+        <origin xyz="${-base_length / 2.5} ${-(base_width) / 4 } ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
+    </joint> 
+
+    <joint name="${prefix}base_caster_base_back_right_joint" type="fixed">
+        <parent link="${prefix}base_link" />
+        <child link="${prefix}caster_base_back_right_link" />
+        <origin xyz="${-base_length / 2.5} ${(base_width) / 4 } ${-(caster_base_height) / 2.0}" rpy="0 0 0"/>
     </joint> 
 
     <joint name="${prefix}right_engine_right_wheel_joint" type="continuous">
         <parent link="${prefix}right_engine_link" />
         <child link="${prefix}right_wheel_link" />
-        <origin xyz="0 ${-(wheel_length + (engine_height / 2.0))} 0" rpy="0 0 0" />
+        <origin xyz="0 ${-(wheel_length + (engine_height / 4.0))} 0" rpy="0 0 0" />
         <axis xyz="0 1 0" />
     </joint>
 
     <joint name="${prefix}left_engine_left_wheel_joint" type="continuous">
         <parent link="${prefix}left_engine_link" />
         <child link="${prefix}left_wheel_link" />
-        <origin xyz="0 ${(wheel_length + (engine_height / 2.0))} 0" rpy="0 0 0" />
+        <origin xyz="0 ${(wheel_length + (engine_height / 4.0))} 0" rpy="0 0 0" />
         <axis xyz="0 1 0" />
     </joint>
 
-    <joint name="${prefix}caster_base_caster_wheel_front_joint" type="fixed">
-        <parent link="${prefix}caster_base_front_link" />
-        <child link="${prefix}caster_wheel_front_link" />
+    <joint name="${prefix}caster_base_caster_wheel_front_left_joint" type="fixed">
+        <parent link="${prefix}caster_base_front_left_link" />
+        <child link="${prefix}caster_wheel_front_left_link" />
         <origin xyz="0 0 ${-wheel_radius / 2.0}" rpy="0 0 0" />
     </joint> 
 
-    <joint name="${prefix}caster_base_caster_wheel_back_joint" type="fixed">
-        <parent link="${prefix}caster_base_back_link" />
-        <child link="${prefix}caster_wheel_back_link" />
+    <joint name="${prefix}caster_base_caster_wheel_front_right_joint" type="fixed">
+        <parent link="${prefix}caster_base_front_right_link" />
+        <child link="${prefix}caster_wheel_front_right_link" />
+        <origin xyz="0 0 ${-wheel_radius / 2.0}" rpy="0 0 0" />
+    </joint> 
+
+    <joint name="${prefix}caster_base_caster_wheel_back_left_joint" type="fixed">
+        <parent link="${prefix}caster_base_back_left_link" />
+        <child link="${prefix}caster_wheel_back_left_link" />
+        <origin xyz="0 0 ${-wheel_radius / 2.0}" rpy="0 0 0" />
+    </joint> 
+
+    <joint name="${prefix}caster_base_caster_wheel_back_right_joint" type="fixed">
+        <parent link="${prefix}caster_base_back_right_link" />
+        <child link="${prefix}caster_wheel_back_right_link" />
         <origin xyz="0 0 ${-wheel_radius / 2.0}" rpy="0 0 0" />
     </joint> 
 

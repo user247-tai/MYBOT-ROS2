@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 10 # Hz
+    update_rate: 20 # Hz
 
     mybot_controller:
       type: diff_drive_controller/DiffDriveController
@@ -13,10 +13,10 @@ mybot_controller:
   ros__parameters:
     type        : diff_drive_controller/DiffDriveController
     use_stamped_vel: true
-    left_wheel_names  : ['right_engine_right_wheel_joint']
-    right_wheel_names : ['left_engine_left_wheel_joint']
+    left_wheel_names  : ['left_engine_left_wheel_joint']
+    right_wheel_names : ['right_engine_right_wheel_joint']
 
-    publish_rate: 10.0               # default: 50
+    publish_rate: 50.0               # default: 50
     # pose_covariance_diagonal : [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
     # twist_covariance_diagonal: [0.001, 0.001, 1.0e-3, 1.0e-3, 1.0e-3, 0.01]
 
@@ -35,10 +35,9 @@ mybot_controller:
     # Publish wheel data
     publish_wheel_data: true
 
-    wheel_separation_multiplier: 1.170
-    #wheel_separation_multiplier: 1.0
-    left_wheel_radius_multiplier: 1.325
-    right_wheel_radius_multiplier: 1.325
+    wheel_separation_multiplier: 1.19
+    left_wheel_radius_multiplier: 1.0
+    right_wheel_radius_multiplier: 1.0
 
     # wheel_separation_multiplier: 1.0
     # left_wheel_radius_multiplier: 1.0
