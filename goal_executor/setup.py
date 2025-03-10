@@ -23,7 +23,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'goal_executor = goal_executor.goal_executor:main'
+            'goal_executor = goal_executor.goal_executor:main',
+            'test_goal_executor = goal_executor.test_goal_executor:main'
         ],
     },
 )
