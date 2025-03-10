@@ -1,0 +1,4 @@
+int64 current_goal_id
+int64 next_goal_id
+float64 estimated_time_remaining
+string goal_state
