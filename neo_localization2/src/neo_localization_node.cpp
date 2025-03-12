@@ -20,6 +20,8 @@
 #include <geometry_msgs/msg/pose_array.hpp>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <geometry_msgs/msg/pose_with_covariance_stamped.h>
+#include <lifecycle_msgs/msg/state.hpp>
+#include <lifecycle_msgs/srv/get_state.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Transform.h>
@@ -177,7 +179,12 @@ public:
     m_sub_pose_estimate = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(m_initial_pose, 1, std::bind(&NeoLocalizationNode::pose_callback, this, _1));
 
     m_pub_map_tile = this->create_publisher<nav_msgs::msg::OccupancyGrid>(m_map_tile, 1);
-    m_pub_loc_pose = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(m_amcl_pose, 10);
+    //Config QoS for goal executor
+    rclcpp::QoS qos_profile(10);
+    qos_profile.durability(RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL);
+    qos_profile.reliability(RMW_QOS_POLICY_RELIABILITY_RELIABLE);
+    //
+    m_pub_loc_pose = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(m_amcl_pose, qos_profile);
     m_pub_loc_pose_2 = this->create_publisher<geometry_msgs::msg::PoseWithCovarianceStamped>(m_map_pose, 10);
     m_pub_pose_array = this->create_publisher<geometry_msgs::msg::PoseArray>(m_particle_cloud, 10);
 
@@ -562,8 +569,22 @@ protected:
 
     // get a new map tile immediately
     update_map();
-  }
 
+    //Add a service for goal_executor node
+    state_server_ = this->create_service<lifecycle_msgs::srv::GetState>(
+      "neo_localization/get_state",
+      std::bind(&NeoLocalizationNode::callbackGetState, this, _1, _2));
+    
+    RCLCPP_INFO(this->get_logger(), "Service neo_localization/get_state is ready to respond.");
+    //
+  }
+  //
+  void callbackGetState(const std::shared_ptr<lifecycle_msgs::srv::GetState::Request> request,
+                        std::shared_ptr<lifecycle_msgs::srv::GetState::Response> response){
+    response->current_state.id = lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE;
+    response->current_state.label = "active";
+  }
+  //
   /*
    * Stores the given map.
    */
@@ -733,6 +754,7 @@ protected:
 
       // publish the transform
       m_tf_broadcaster->sendTransform(pose);
+      
     }
   }
 
@@ -809,6 +831,7 @@ private:
   std::thread m_map_update_thread;
   bool m_broadcast_info;
   rclcpp::TimerBase::SharedPtr m_loc_update_timer;
+  rclcpp::Service<lifecycle_msgs::srv::GetState>::SharedPtr state_server_;
 
 };
 

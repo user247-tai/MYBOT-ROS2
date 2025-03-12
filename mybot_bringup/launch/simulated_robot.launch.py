@@ -13,6 +13,7 @@ def generate_launch_description():
     use_navslam = LaunchConfiguration("use_navslam")
     use_amcl = LaunchConfiguration("use_amcl")
     use_filters = LaunchConfiguration("use_filters")
+    patrol_mode = LaunchConfiguration("patrol_mode")
 
     use_slam_arg = DeclareLaunchArgument(
         "use_slam",
@@ -37,6 +38,11 @@ def generate_launch_description():
     use_filters_arg = DeclareLaunchArgument(
         'use_filters',
         default_value='true'
+    )
+
+    patrol_mode_arg = DeclareLaunchArgument(
+        'patrol_mode',
+        default_value="false"
     )
 
     param_file_name = "navslam_params" + '.yaml'
@@ -114,6 +120,17 @@ def generate_launch_description():
         condition=IfCondition(use_navslam)
     ) 
 
+    patrol_node = Node(
+        package="goal_executor",
+        executable="goal_executor",
+        name="goal_executor",
+        output="screen",
+        parameters=[
+            {"use_amcl": use_amcl},
+        ],
+        condition=IfCondition(patrol_mode)
+    )
+
     # rviz_localization = Node(
     #     package="rviz2",
     #     executable="rviz2",
@@ -148,11 +165,13 @@ def generate_launch_description():
         use_navslam_arg,
         use_amcl_arg,
         use_filters_arg,
+        patrol_mode_arg,
         gazebo,
         controller,
         slam,
         rviz_navslam,
         navigation,
         navslam_navigation,
-        navslam_slam
+        navslam_slam,
+        patrol_node
     ])

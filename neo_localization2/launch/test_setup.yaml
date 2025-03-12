@@ -91,7 +91,7 @@ neo_localization2_node:
     # amcl_pose topic
     amcl_pose: amcl_pose
 
-    set_initial_pose: true
-    initia_pose.x: 0.0
-    initia_pose.y: 0.0
-    initia_pose.yaw: 0.0
+    # set_initial_pose: true
+    # initia_pose.x: 0.0
+    # initia_pose.y: 0.0
+    # initia_pose.yaw: 0.0
