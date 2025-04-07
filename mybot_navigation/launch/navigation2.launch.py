@@ -100,25 +100,25 @@ def generate_launch_description():
             condition=UnlessCondition(use_amcl)
         ),
 
-        #Keepout filter
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
-            launch_arguments={
-                'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
-                'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/keepout_mask.yaml',
-            }.items(),
-            condition=IfCondition(use_filters)
-        ),
+        # #Keepout filter
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
+        #     launch_arguments={
+        #         'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/keepout_params.yaml',
+        #         'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/keepout_mask.yaml',
+        #     }.items(),
+        #     condition=IfCondition(use_filters)
+        # ),
 
-        #Speed filter
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
-            launch_arguments={
-                'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/speed_params.yaml',
-                'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/speed_mask.yaml',
-            }.items(),
-            condition=IfCondition(use_filters)
-        ),
+        # #Speed filter
+        # IncludeLaunchDescription(
+        #     PythonLaunchDescriptionSource(os.path.join(cosmap_filter_launch_dir, 'costmap_filter_info.launch.py')),
+        #     launch_arguments={
+        #         'params_file': '/home/tai/mybot_workspace/src/nav2_costmap_filters_demo/params/speed_params.yaml',
+        #         'mask': '/home/tai/mybot_workspace/src/mybot_navigation/filter/speed_mask.yaml',
+        #     }.items(),
+        #     condition=IfCondition(use_filters)
+        # ),
         
         #Rviz2
         Node(

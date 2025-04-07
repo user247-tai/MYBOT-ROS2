@@ -24,7 +24,8 @@ setup(
     entry_points={
         'console_scripts': [
             'goal_executor = goal_executor.goal_executor:main',
-            'test_goal_executor = goal_executor.test_goal_executor:main'
+            'test_goal_executor = goal_executor.test_goal_executor:main',
+            'save_goal_executor = goal_executor.save_goal_executor:main'
         ],
     },
 )
