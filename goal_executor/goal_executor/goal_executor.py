@@ -14,7 +14,7 @@ import time
 from datetime import datetime
 from goal_executor.operation_state_machine import *
 import tf_transformations
-from std_msgs.msg import String, Int32
+from std_msgs.msg import String, Int32, Float64, Int64
 
 class TF2Echo(Node):
     def __init__(self, name):
@@ -118,6 +118,9 @@ class GoalExecutor(Node):
         self.patrolRosMsg = self.patrolDictToRosMsg(self.patrolConfig)
 
         self.goalStatePublisher = self.create_publisher(GoalState, '/goal_state', self.qos_profile)
+        self.goalStateStatus = self.create_publisher(String, '/goal_state_status', 10)
+        self.goalEstStatus = self.create_publisher(Float32, 'goal_est_status', 10)
+        self.goalCurStatus = self.create_publisher(Int32, 'goal_cur_status', 10)
         self.patrolConfigPub = self.create_publisher(PatrolConfig, '/patrol_config', self.qos_profile)
         # self.routeListPub = self.create_publisher(RouteList, '/route_list', self.qos_profile)
 
@@ -286,6 +289,19 @@ class GoalExecutor(Node):
                     Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9
                 )
                 self.goalState.goal_state = "PROCESSING"
+
+                goal_state_status_msg = String()
+                goal_state_status_msg.data = self.goalState.goal_state
+                self.goalStateStatus.publish(goal_state_status_msg)
+
+                goal_cur_status_msg = Int64()
+                goal_cur_status_msg.data = self.goalState.current_goal_id              
+                self.goalCurStatus.publish(goal_cur_status_msg)
+
+                goal_est_status_msg = Float64()
+                goal_est_status_msg.data = self.goalState.estimated_time_remaining
+                self.goalEstStatus.publish(goal_est_status_msg)
+
                 self.goalStatePublisher.publish(self.goalState)
                 time.sleep(0.2)
 
@@ -309,6 +325,18 @@ class GoalExecutor(Node):
                 self.goalState.estimated_time_remaining = 0.0
             else:
                 self.get_logger().error('Goal has an invalid return status!')
+
+            goal_state_status_msg = String()
+            goal_state_status_msg.data = self.goalState.goal_state
+            self.goalStateStatus.publish(goal_state_status_msg)
+
+            goal_cur_status_msg = Int64()
+            goal_cur_status_msg.data = self.goalState.current_goal_id              
+            self.goalCurStatus.publish(goal_cur_status_msg)
+
+            goal_est_status_msg = Float64()
+            goal_est_status_msg.data = self.goalState.estimated_time_remaining
+            self.goalEstStatus.publish(goal_est_status_msg)
 
             self.goalStatePublisher.publish(self.goalState)
         
@@ -349,6 +377,19 @@ class GoalExecutor(Node):
             feedback = self.navigator.getFeedback()
             self.goalState.estimated_time_remaining = (Duration.from_msg(feedback.estimated_time_remaining).nanoseconds / 1e9)
             self.goalState.goal_state = "PROCESSING"
+
+            goal_state_status_msg = String()
+            goal_state_status_msg.data = self.goalState.goal_state
+            self.goalStateStatus.publish(goal_state_status_msg)
+
+            goal_cur_status_msg = Int64()
+            goal_cur_status_msg.data = self.goalState.current_goal_id              
+            self.goalCurStatus.publish(goal_cur_status_msg)
+
+            goal_est_status_msg = Float64()
+            goal_est_status_msg.data = self.goalState.estimated_time_remaining
+            self.goalEstStatus.publish(goal_est_status_msg)
+
             self.goalStatePublisher.publish(self.goalState)
             time.sleep(0.2)
         # Do something depending on the return code
@@ -367,6 +408,19 @@ class GoalExecutor(Node):
             self.goalState.estimated_time_remaining = 0.0
         else:
             print('Goal has an invalid return status!')
+
+        goal_state_status_msg = String()
+        goal_state_status_msg.data = self.goalState.goal_state
+        self.goalStateStatus.publish(goal_state_status_msg)
+
+        goal_cur_status_msg = Int64()
+        goal_cur_status_msg.data = self.goalState.current_goal_id              
+        self.goalCurStatus.publish(goal_cur_status_msg)
+
+        goal_est_status_msg = Float64()
+        goal_est_status_msg.data = self.goalState.estimated_time_remaining
+        self.goalEstStatus.publish(goal_est_status_msg)
+        
         self.goalStatePublisher.publish(self.goalState)
 
     def patrolConfigUpdateCb(self, msg):
