@@ -7,7 +7,7 @@ class AutonomousMode(Enum):
 class OperationStateMachine:
     def __init__(self):
         # Initial state is GOAL_NAVIGATE
-        self.state = AutonomousMode.PATROL
+        self.state = AutonomousMode.GOAL_NAVIGATE
 
     # Method to update state based on isPatrol and isShuttle
     def update_state(self, mode):

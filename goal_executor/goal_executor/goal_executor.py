@@ -14,6 +14,7 @@ import time
 from datetime import datetime
 from goal_executor.operation_state_machine import *
 import tf_transformations
+from std_msgs.msg import String, Int32
 
 class TF2Echo(Node):
     def __init__(self, name):
@@ -49,25 +50,40 @@ class GoalExecutor(Node):
         self.use_amcl_param_value = self.get_parameter("use_amcl").value
         self.get_logger().info(f'Using {self.use_amcl_param_value} for localization.')
         self.get_logger().info(f'Type: {type(self.use_amcl_param_value)}')
+        self.current_mode = None
 
         self.create_subscription(
-            MoveToGoal,
+            Int32,
             'move_to_goal',
             self.moveCallback,
             1
         )
 
+        # self.create_subscription(
+        #     PatrolConfig,
+        #     'patrol_config_update',
+        #     self.patrolConfigUpdateCb,
+        #     1
+        # )
+
         self.create_subscription(
-            PatrolConfig,
-            'patrol_config_update',
-            self.patrolConfigUpdateCb,
+            String,
+            'autonomous_mode_switch',
+            self.autonomousModeSwitchCb,
             1
         )
 
         self.create_subscription(
-            AutonomousModeRequest,
-            'autonomous_mode_switch',
-            self.autonomousModeSwitchCb,
+            String,
+            'mode',
+            self.CurrentModeCb,
+            1
+        )
+
+        self.create_subscription(
+            Bool,
+            'update_goal_list',
+            self.UpdateGoalListCb,
             1
         )
 
@@ -85,10 +101,10 @@ class GoalExecutor(Node):
         self.stop_monitoring = False
         self.currentTranslation = Vector3Stamped()
         self.currentQuaternion = QuaternionStamped()
-        self.goalListFile = '/home/tai/mybot_workspace/src/goal_database/goal_list.json'
+        self.goalListFile = '/home/tai/mybot_ws/src/MYBOT-ROS2/goal_database/goal_list.json'
 
         self.goalState = GoalState()
-        self.goalState.current_goal_id = 5
+        self.goalState.current_goal_id = 0
         self.qos_profile = QoSProfile(
             reliability=ReliabilityPolicy.RELIABLE,
             durability=DurabilityPolicy.TRANSIENT_LOCAL,
@@ -103,7 +119,7 @@ class GoalExecutor(Node):
 
         self.goalStatePublisher = self.create_publisher(GoalState, '/goal_state', self.qos_profile)
         self.patrolConfigPub = self.create_publisher(PatrolConfig, '/patrol_config', self.qos_profile)
-        self.routeListPub = self.create_publisher(RouteList, '/route_list', self.qos_profile)
+        # self.routeListPub = self.create_publisher(RouteList, '/route_list', self.qos_profile)
 
         # Publish transform from baselink(robot center) to map frame
         self.tf_baselink_to_map_pub = self.create_publisher(RobotPose, 'tf_baselink_map', self.qos_profile)
@@ -118,7 +134,7 @@ class GoalExecutor(Node):
         self.isPatrolThreadAlive = False
         self.timeRangeCheckFlag = True
         self.isPatrolStart = False
-        self.currentAutonomousMode = AutonomousMode.PATROL
+        # self.currentAutonomousMode = AutonomousMode.GOAL_NAVIGATE
         self.state_machine = OperationStateMachine()
 
         self.signalAutonomousModeThread = threading.Thread(target=self.signalAutonomousModeMonitor, args=())
@@ -150,6 +166,10 @@ class GoalExecutor(Node):
             self.get_logger().info("waiting for localization active ...")
             time.sleep(1)
         self.get_logger().info("initNavigator successfully")
+
+    def CurrentModeCb(self, msg: String):
+        if self.current_mode != msg.data:
+            self.current_mode = msg.data
 
     def particlecloudCb(self, msg):
         """ Callback function when /particlecloud receives data """
@@ -194,15 +214,22 @@ class GoalExecutor(Node):
     #     self.moveToGoal(goalId)
     #     self.goalState.next_goal_id = goalId
 
-    def moveCallback(self, msg):
+    def UpdateGoalListCb(self, msg: Bool):
+        self.goalList = self.loadGoalList()
+ 
+    def moveCallback(self, msg: Int32):
         # Ignore request from app/dashboard if in shuttle or patrol mode
-        if self.currentAutonomousMode != AutonomousMode.GOAL_NAVIGATE:
-            self.get_logger().info(f"Request fails, robot is in mode: {self.currentAutonomousMode}")
+        # if self.currentAutonomousMode != AutonomousMode.GOAL_NAVIGATE:
+        if self.current_mode != 'NORMAL':
+            self.get_logger().info(f"Request fails, robot is in mode: {self.current_mode}")
             return
-        goalId = msg.goal_id
+        if msg.data == -1:
+            self.get_logger().info(f"Goal state: {msg.data}")
+            return
+        goalId = msg.data
         self.goalState.current_goal_id = goalId
         #self.navigator.cancelTask()
-
+        
         if self.monitoring_thread is not None and self.monitoring_thread.is_alive():
             self.stop_monitoring = True 
             self.monitoring_thread.join()  
@@ -350,7 +377,7 @@ class GoalExecutor(Node):
         msg_json = json.dumps(msg_dict)
         # Remove slash in json
         json_without_slash = json.loads(msg_json)
-        with open('/home/tai/mybot_workspace/src/goal_database/patrol_config.json', 'w') as json_file:
+        with open('/home/tai/mybot_ws/src/MYBOT-ROS2/goal_database/patrol_config.json', 'w') as json_file:
             json.dump(json_without_slash, json_file, indent=4)
         # load patrol configuration
         self.patrolConfig = self.loadPatrolConfig()
@@ -359,10 +386,10 @@ class GoalExecutor(Node):
         # make sure we check the time range when a config is update
         self.timeRangeCheckFlag = True
 
-    def autonomousModeSwitchCb(self, msg):
-        if (self.state_machine.get_state_string() != msg.mode):
+    def autonomousModeSwitchCb(self, msg: String):
+        if (self.state_machine.get_state_string() != msg.data):
             self.get_logger().info(f"Received external request for mode: {msg}")
-            self.state_machine.update_state(msg.mode)
+            self.state_machine.update_state(msg.data)
             #self.timeRangeCheckFlag = True
             self.navigator.cancelTask()
             with self.signalThreadCondition:
@@ -378,14 +405,14 @@ class GoalExecutor(Node):
     def loadPatrolConfig(self):
         config = {}
         try:
-            with open('/home/tai/mybot_workspace/src/goal_database/patrol_config.json', 'r') as json_file:
+            with open('/home/tai/mybot_ws/src/MYBOT-ROS2/goal_database/patrol_config.json', 'r') as json_file:
                 config = json.load(json_file)
             return config
         except FileNotFoundError:
-            self.get_logger().warn(f"File not found: {'/home/tai/mybot_workspace/src/goal_database/patrol_config.json'}")
+            self.get_logger().warn(f"File not found: {'/home/tai/mybot_ws/src/MYBOT-ROS2/goal_database/patrol_config.json.json'}")
             return {}
         except json.JSONDecodeError:
-            self.get_logger().warn(f"Error decoding JSON file, file is empty or malformed: {'/home/tai/mybot_workspace/src/goal_database/patrol_config.json'}")
+            self.get_logger().warn(f"Error decoding JSON file, file is empty or malformed: {'/home/tai/mybot_ws/src/MYBOT-ROS2/goal_database/patrol_config.json'}")
             return {}
 
     def updateExtendedOperationMode(self, mode):
@@ -501,11 +528,11 @@ class GoalExecutor(Node):
                 self.isPatrolStart = self.isShiftStartCheck(self.patrolRosMsg)
                 # self.isShuttleStart = self.isShiftStartCheck(self.shuttleRosMsg)
             if self.patrolRosMsg:
-                if(self.patrolRosMsg.auto_run) and (self.isPatrolStart) and (self.isPatrolThreadAlive == False):
+                if ((self.current_mode == 'PATROL') and (self.isPatrolStart) and (self.isPatrolThreadAlive == False)):
                     # Time shift satisfied and auto_run config is set. create a thread to run in patrol mode
                     patrolThread = threading.Thread(target=self.patrolThread, args=())
                     patrolThread.daemon = True
-                    self.currentAutonomousMode = AutonomousMode.PATROL
+                    # self.currentAutonomousMode = AutonomousMode.PATROL
                     self.state_machine.update_state('PATROL')
                     # Priority for shuttle thread is always higher than patrol
                     if self.isPatrolThreadAlive == False:
@@ -514,18 +541,18 @@ class GoalExecutor(Node):
                 self.get_logger().warn("No patrol config is set")
 
             # Check if received mode change from autonomousModeSwitchCb
-            if (self.currentAutonomousMode != self.state_machine.get_state()):
-                # Pub mode and set state
-                self.currentAutonomousMode = self.state_machine.get_state()
-                self.get_logger().info(f"mode changes to: {self.currentAutonomousMode}")
-                if (self.currentAutonomousMode == AutonomousMode.PATROL) and (self.patrolRosMsg):
-                    patrolThread = threading.Thread(target=self.patrolThread, args=())
-                    patrolThread.daemon = True
-                    self.currentAutonomousMode = AutonomousMode.PATROL
-                    self.state_machine.update_state('PATROL')
-                    if self.isPatrolThreadAlive == False:
-                        patrolThread.start()
-                        self.get_logger().info(f"Create patrol thread by request: {self.isPatrolThreadAlive}")
+            # if (self.currentAutonomousMode != self.state_machine.get_state()):
+            #     # Pub mode and set state
+            #     self.currentAutonomousMode = self.state_machine.get_state()
+            #     self.get_logger().info(f"mode changes to: {self.currentAutonomousMode}")
+            if (self.current_mode == 'PATROL') and (self.patrolRosMsg):
+                patrolThread = threading.Thread(target=self.patrolThread, args=())
+                patrolThread.daemon = True
+                self.current_mode = 'PATROL'
+                self.state_machine.update_state('PATROL')
+                if self.isPatrolThreadAlive == False:
+                    patrolThread.start()
+                    self.get_logger().info(f"Create patrol thread by request: {self.isPatrolThreadAlive}")
                 # if (self.currentAutonomousMode == AutonomousMode.SHUTTLE) and (self.shuttleRosMsg):
                 #     shuttleThread = threading.Thread(target=self.shuttleThread, args=())
                 #     shuttleThread.daemon = True
@@ -566,7 +593,8 @@ class GoalExecutor(Node):
         shift_started = False
         publishStartOnce = False
         publishWaitOnce = False
-        while self.currentAutonomousMode == AutonomousMode.PATROL:
+        # while self.currentAutonomousMode == AutonomousMode.PATROL:
+        while self.current_mode == 'PATROL':
             if (cancelPrevGoal == False):
                 self.navigator.cancelTask()
                 cancelPrevGoal = True
